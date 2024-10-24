@@ -17,10 +17,6 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
-    - name: Install dependencies
-      run: |
-        sudo apt-get install mysql-client    
-
     - name: Wait for RDS to be ready
       run: |
         for i in {1..30}; do
