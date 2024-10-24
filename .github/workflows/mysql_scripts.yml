@@ -20,7 +20,6 @@ jobs:
     - name: Install dependencies
       run: |
         apt-get update
-        apt-get install -y curl
         apt-get install -y default-mysql-client     
 
     - name: Wait for RDS to be ready
