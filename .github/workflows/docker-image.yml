@@ -56,4 +56,5 @@ jobs:
           IMAGE_TAG: latest
         run: |
           docker buildx build --platform linux/arm64 --build-arg TENANT=uala -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f UalaAccounting/UalaAccounting.api/Dockerfile --provenance=false --push .
-          echo "image=$IMAGE_TAG" >> $GITHUB_OUTPUT
+          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+          echo "IMAGE_URI=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_ENV
