@@ -1,0 +1,60 @@
+name: DEPLOY_INFRA_ON_AWS
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ["terraform/**"]
+
+  pull_request:
+    branches: [main]
+    paths: ["terraform/**"]
+
+jobs:
+  plan:
+    name: Terraform plan
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js 14.x
+        uses: actions/setup-node@v1
+        with:
+          node-version: 14.x
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID}}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-west-2
+      - name: Initialise project and view terraform plan
+        run: |
+          cd terraform 
+          cd qa
+          terraform fmt
+          terraform init 
+          terraform plan -var='example_api_key=${{ secrets.EXAMPLE_API_KEY }}'
+
+  deploy:
+    name: Terraform Deploy
+    needs: plan
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js 14.x
+        uses: actions/setup-node@v1
+        with:
+          node-version: 14.x
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-west-2
+      - name: Initialise project and deploy terraform
+        run: |
+          cd terraform
+          cd qa
+          terraform fmt
+          terraform init
+          terraform apply -var='example_api_key=${{ secrets.EXAMPLE_API_KEY }}' --auto-approve=true
