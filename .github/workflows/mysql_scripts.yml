@@ -16,7 +16,10 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
-
+      
+    - name: Install MySQL Client
+      run: sudo apt-get update && sudo apt-get install -y mysql-client
+        
     - name: Run MySQL scripts
       run: |
         for script in "UalaAccounting/UalaAccounting.ddl/0001 schema.sql" "UalaAccounting/UalaAccounting.setup/0001 insert setup.sql"; do
