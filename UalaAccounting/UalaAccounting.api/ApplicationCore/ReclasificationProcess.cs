@@ -35,7 +35,7 @@ namespace UalaAccounting.api.ApplicationCore
 
                 //RECLASIFICACION DE AJUSTES
                 List<Accountinghubentry> adjustmentEntriesList = await accountingEntriesData.GetAdjustmentEntriesAsync(from, to);
-                logger.LogInformation($"Load Adjustment Entries({adjustmentEntriesList.Count})");
+                logger.LogInformation($"Load Adjustments Entries({adjustmentEntriesList.Count})");
                 await adjustmentsReclassification(adjustmentEntriesList);
             }
             catch (Exception ex)
