@@ -1,0 +1,43 @@
+name: DESTROY_AWS_INFRA
+on:
+ workflow_dispatch:
+
+jobs:
+ tf-destroy:
+   runs-on: ubuntu-latest
+   env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_REGION: 'us-west-1'
+   steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        
+      - name: Setup Terraform                                                                      
+        uses: hashicorp/setup-terraform@v1
+
+      - name: Terraform Init
+        id: init
+        run: |
+          cd UalaAccounting 
+          cd UalaAccounting.infra
+          cd terraform
+          terraform init         
+        
+      - name: Show Destroy plan
+        run: |
+          cd UalaAccounting 
+          cd UalaAccounting.infra
+          cd terraform
+          terraform init 
+          terraform plan -destroy       
+        continue-on-error: true
+
+      - name: Terraform destroy
+        id: destroy
+        run: |
+          cd UalaAccounting 
+          cd UalaAccounting.infra
+          cd terraform
+          terraform init
+          terraform destroy --auto-approve=true        
