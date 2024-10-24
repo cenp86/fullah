@@ -25,7 +25,7 @@ variable "container_port" {
 variable "image_url" {
   description = "Docker image url hosted on ECR"
   type        = string
-  default     = "cenp86/demogh-image-test7"
+  default     = ""
 }
 variable "vpc_id" {
   description = "VPC ID"
@@ -85,7 +85,7 @@ variable "mambu_url_base" {
 variable "mambu_apikey" {
   description = "Mambu apikey"
   type        = string
-  default     = "ro4GzbRFIjrZMmfG31h96ZOgecbVIHat"
+  default     = ""
 }
 variable "acm_certificate_arn" {
   description = "ACM certificate ARN"
