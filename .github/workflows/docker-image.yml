@@ -1,11 +1,11 @@
 name: PUSH_AH_MAMBU_TO_INFRA_ECR_MEX
 
 on:
-  pull_request:
+  push:
     branches: 
       - "main"
     paths:
-      - 'UalaAccounting/UalaAccounting/**'
+      - 'UalaAccounting/UalaAccounting.api/**'
   workflow_dispatch: # Permite ejecutar el workflow manualmente desde la interfaz de GitHub Actions      
 
 
