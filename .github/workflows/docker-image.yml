@@ -5,7 +5,7 @@ on:
     branches: 
       - "main"
     paths:
-      - 'UalaAccounting/**'
+      - 'UalaAccounting/UalaAccounting/**'
   workflow_dispatch: # Permite ejecutar el workflow manualmente desde la interfaz de GitHub Actions      
 
 
