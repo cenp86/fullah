@@ -11,6 +11,19 @@
 #   shared_credentials_files = ["~/.aws/credentials"]
 # }
 
+###################################################################################
+# Terraform backend
+###################################################################################
+
+terraform {
+  backend "s3" {
+    bucket                  = "carlosn-bucket"
+    key                     = "my-terraform-project"
+    region                  = "us-east-1"
+    # shared_credentials_file = "~/.aws/credentials"
+  }
+}
+
 ##########################################################################################
 # RDS Database Instance
 ##########################################################################################
@@ -310,7 +323,7 @@ resource "aws_ecs_service" "ecs_service" {
 ##########################################################################################
 
 resource "aws_s3_bucket" "s3_bucket" {
-  bucket = "accounting-hub-s3-bucket-${var.environment}"
+  bucket = "accounting-hub-s3-bucket2-${var.environment}"
 
   tags = {
     Application = var.appname
