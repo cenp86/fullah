@@ -23,14 +23,14 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID}}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: eu-west-2
+          aws-region: us-east-1
       - name: Initialise project and view terraform plan
         run: |
-          cd terraform 
-          cd qa
-          terraform fmt
+          cd UalaAccounting 
+          cd UalaAccounting.infra
+          cd terraform
           terraform init 
-          terraform plan -var='example_api_key=${{ secrets.EXAMPLE_API_KEY }}'
+          terraform plan -var='mambu_apikey=${{ secrets.MAMBU_APIKEY }}'
 
   deploy:
     name: Terraform Deploy
@@ -48,11 +48,11 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: eu-west-2
+          aws-region: us-east-1
       - name: Initialise project and deploy terraform
         run: |
+          cd UalaAccounting 
+          cd UalaAccounting.infra
           cd terraform
-          cd qa
-          terraform fmt
           terraform init
-          terraform apply -var='example_api_key=${{ secrets.EXAMPLE_API_KEY }}' --auto-approve=true
+          terraform apply -var='mambu_apikey=${{ secrets.MAMBU_APIKEY }}' --auto-approve=true
