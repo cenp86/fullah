@@ -4,6 +4,9 @@ on:
   pull_request:
     branches:
       - main
+    paths:
+      - 'UalaAccounting/UalaAccounting.dll/**'
+      - 'UalaAccounting/UalaAccounting.setup/**'
   workflow_dispatch: # Permite ejecutar el workflow manualmente desde la interfaz de GitHub Actions  
 
 jobs:
@@ -33,7 +36,9 @@ jobs:
         done
     - name: Run MySQL scripts
       run: |
-        mysql -h "${{ secrets.DB_HOST }}" -u "${{ secrets.DB_USER }}" -p"${{ secrets.DB_PASSWORD}}" "${{ secrets.DB_NAME }}" < schema.sql
+        for script in UalaAccounting/UalaAccounting.dll/0001 schema.sql UalaAccounting/UalaAccounting.dll/0001 insert setup.sql; do
+          mysql -h "${{ secrets.DB_HOST }}" -u "${{ secrets.DB_USER }}" -p"${{ secrets.DB_PASSWORD}}" "${{ secrets.DB_NAME }}" < "$script"
+        done        
     - name: Clean up
       run: |
         echo "Cleaning up..."
