@@ -1,0 +1,8 @@
+version: '3.4'
+
+services:
+  ualaaccounting.api:
+    image: ${DOCKER_REGISTRY-}ualaaccounting
+    build:
+      context: .
+      dockerfile: UalaAccounting.api/Dockerfile

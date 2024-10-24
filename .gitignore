@@ -1,0 +1,76 @@
+# Directories for the binaries and intermediate files
+bin/
+obj/
+out/
+*.dll
+*.json
+*.pdb
+*.cache
+**/bin/
+**/obj/
+
+UalaAccounting/.vs/UalaAccounting/xs/UserPrefs.xml
+UalaAccounting/UalaAccounting.api/bin/
+UalaAccounting/UalaAccounting.api/bin/*
+UalaAccounting/UalaAccounting.api/obj/
+UalaAccounting/UalaAccounting.api/obj/*
+
+# Visual Studio user specific files
+*.suo
+*.user
+*.userosscache
+*.userprefs
+.vs/
+
+# NuGet Packages
+packages/
+*.nupkg
+*.snupkg
+*.nuspec
+
+# NuGet caches and config
+.nuget/
+nuget.exe
+NuGetScratch/
+NuGet.Config
+
+# Logs and databases
+*.log
+*.cache
+*.log.lock
+*.pdb
+
+# Tools directories
+.idea/
+.vscode/
+
+# Temporaries and backups
+*.*~
+*.swp
+*~
+*.tmp
+
+# Coverage and Test Results
+coverage/
+TestResults/
+
+# Exclude configuration files that contain sensitive data
+appsettings.json
+appsettings.Development.json
+appsettings.Production.json
+appsettings.*.json
+
+# Exclude wwwroot and dist directories if needed
+wwwroot/
+dist/
+
+# Build scripts
+build/
+Build/
+UalaAccounting/UalaAccounting.api/obj/
+
+#terraform
+*.terraform
+*.terraform.*
+.DS_Store
+

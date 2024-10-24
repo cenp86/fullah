@@ -1,0 +1,6 @@
+﻿dotnet ef dbcontext scaffold  "Server=localhost; Database=conta; User=root; Password=mambu123" Pomelo.EntityFrameworkCore.MySql -o EntitiesDB -f -t RPATRANSFORMADO -t gljournalentry -t branch -t glaccount -t loanaccount -t loantransaction -t loanproduct -t RPAORIGINAL -t customfieldvalue -t customfield -t accountinginterestaccrualbreakdown -t LOGUEO -t accountchart -t productaccountinghub -t configurationsheets -t sheetparameterization -t configurationaccountinghub -t configurationsheetcolumns --force
+
+dotnet new tool-manifest
+dotnet tool install dotnet-ef --version 7.0.0
+
+dotnet ef dbcontext scaffold  "Server=localhost; Database=conta; User=root; Password=Mambu123." Pomelo.EntityFrameworkCore.MySql -o EntitiesDB -f -t accountinghubexit -t gljournalentry -t branch -t glaccount -t loanaccount -t loantransaction -t loanproduct -t accountinghubentry -t customfieldvalue -t customfield -t accountinginterestaccrualbreakdown -t accountinghublogs -t accountchart -t productaccountinghub -t configurationsheets -t sheetparametrization -t loanaccounthistory -t configurationaccountinghub -t configurationsheetcolumns -t transactiondetails -t transactionchannel
