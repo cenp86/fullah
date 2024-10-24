@@ -310,7 +310,7 @@ resource "aws_ecs_service" "ecs_service" {
 ##########################################################################################
 
 resource "aws_s3_bucket" "s3_bucket" {
-  bucket = "accounting-hub-s3-bucket-${var.environment}"
+  bucket = "accounting-hub-s3-bucket2-${var.environment}"
 
   tags = {
     Application = var.appname
