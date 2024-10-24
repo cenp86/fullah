@@ -1,0 +1,59 @@
+name: PUSH_AH_MAMBU_TO_INFRA_ECR_MEX
+
+on:
+  pull_request:
+    branches: 
+      - "main"
+    paths:
+      - 'UalaAccounting/UalaAccounting/**'
+  workflow_dispatch: # Permite ejecutar el workflow manualmente desde la interfaz de GitHub Actions      
+
+
+env:
+  ECR_REPOSITORY: testecr
+  AWS_DEFAULT_REGION: us-east-1
+  
+jobs:
+  build:
+    name: 'PUSH_AH_MAMBU_TO_INFRA_ECR_MEX'
+    runs-on: ubuntu-latest
+
+    permissions:
+          id-token: write
+          contents: read
+
+    steps:
+      
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          platforms: arm64
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2 
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+        with:
+          mask-password: 'true'
+
+      - name: Build, tag, and push image to Amazon ECR
+        id: build-push
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: ${{ env.ECR_REPOSITORY }}
+          IMAGE_TAG: latest
+        run: |
+          docker buildx build --platform linux/arm64 --build-arg TENANT=uala -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f UalaAccounting/UalaAccounting.api/Dockerfile --provenance=false --push .
+          echo "image=$IMAGE_TAG" >> $GITHUB_OUTPUT

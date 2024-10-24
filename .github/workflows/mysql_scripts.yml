@@ -1,0 +1,44 @@
+name: DUMP_DDL_DATA_TO_RDS
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'UalaAccounting/UalaAccounting.dll/**'
+      - 'UalaAccounting/UalaAccounting.setup/**'
+  workflow_dispatch: # Permite ejecutar el workflow manualmente desde la interfaz de GitHub Actions  
+
+jobs:
+  run-mysql-scripts:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up AWS CLI
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-1
+
+    - name: Wait for RDS to be ready
+      run: |
+        for i in {1..30}; do
+          if mysqladmin ping -h "${{ secrets.DB_HOST }}" -u "${{ secrets.DB_USER }}" -p"${{ secrets.DB_PASSWORD }}" --silent; then
+            echo "RDS is ready!"
+            break
+          fi
+          echo "Waiting for RDS..."
+          sleep 2
+        done
+    - name: Run MySQL scripts
+      run: |
+        for script in UalaAccounting/UalaAccounting.dll/0001 schema.sql UalaAccounting/UalaAccounting.dll/0001 insert setup.sql; do
+          mysql -h "${{ secrets.DB_HOST }}" -u "${{ secrets.DB_USER }}" -p"${{ secrets.DB_PASSWORD}}" "${{ secrets.DB_NAME }}" < "$script"
+        done        
+    - name: Clean up
+      run: |
+        echo "Cleaning up..."
