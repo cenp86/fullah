@@ -1,4 +1,4 @@
-name: Run MySQL Scripts on AWS RDS
+name: DUMP_DDL_DATA_TO_RDS
 
 on:
   pull_request:
