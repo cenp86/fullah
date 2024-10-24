@@ -3,9 +3,11 @@ name: DEPLOY_INFRA_ON_AWS
 on:
   workflow_dispatch:
   push:
-    branches: [main]
-    paths: 'UalaAccounting/UalaAccounting.infra/terraform/**'
-
+    branches: 
+      - "main"
+    paths:
+      - 'UalaAccounting/UalaAccounting.infra/terraform/**'
+      
 jobs:
   plan:
     name: Terraform plan
