@@ -1,5 +1,14 @@
 name: do-the-job
-on: push
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'UalaAccounting/UalaAccounting.dll/**'
+      - 'UalaAccounting/UalaAccounting.setup/**'
+  workflow_dispatch: # Permite ejecutar el workflow manualmente desde la interfaz de GitHub Actions  
+  
 jobs:
   start-runner:
     name: Start self-hosted EC2 runner
