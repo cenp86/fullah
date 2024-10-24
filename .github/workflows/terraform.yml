@@ -4,11 +4,7 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
-    paths: ["terraform/**"]
-
-  pull_request:
-    branches: [main]
-    paths: ["terraform/**"]
+    paths: 'UalaAccounting/UalaAccounting.infra/terraform/**'
 
 jobs:
   plan:
