@@ -10,7 +10,6 @@ on:
 
 
 env:
-  OIDC_ASSUME_ROLE: ${{ secrets.OIDC_ASSUME_ROLE }}
   ECR_REPOSITORY: testecr
   AWS_DEFAULT_REGION: us-east-1
   
