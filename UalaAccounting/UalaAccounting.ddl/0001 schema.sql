@@ -1,3 +1,5 @@
+USE CONTA;
+
 DROP TABLE IF EXISTS `accountchart`;
 CREATE TABLE `accountchart` (
   `ENCODEDKEY` varchar(45) NOT NULL,

@@ -17,9 +17,9 @@
 
 terraform {
   backend "s3" {
-    bucket                  = "carlosn-bucket"
-    key                     = "my-terraform-project"
-    region                  = "us-east-1"
+    bucket = "carlosn-bucket"
+    key    = "my-terraform-project"
+    region = "us-east-1"
     # shared_credentials_file = "~/.aws/credentials"
   }
 }
@@ -53,6 +53,7 @@ resource "aws_db_instance" "rds_instance" {
   allocated_storage      = 50
   engine_version         = "8.0.35"
   instance_class         = "db.t4g.medium"
+  db_name                = "conta"
   username               = var.db_username
   password               = random_password.master.result
   vpc_security_group_ids = [var.sg_rds]
@@ -431,7 +432,8 @@ resource "aws_api_gateway_deployment" "api_gateway_deploy" {
   depends_on = [
     aws_api_gateway_vpc_link.vpc_link,
     aws_api_gateway_integration.stage_change_lambda_integration,
-    aws_api_gateway_integration.accounting_hub_integration
+    aws_api_gateway_integration.orchestrate_ah_integration,
+    aws_api_gateway_integration.status_orchestrate_ah_integration
   ]
 
   lifecycle {
@@ -474,26 +476,51 @@ resource "aws_api_gateway_integration" "stage_change_lambda_integration" {
   uri                     = aws_lambda_function.state_change_lambda.invoke_arn
 }
 
-resource "aws_api_gateway_resource" "accounting_hub_resource" {
+resource "aws_api_gateway_resource" "orchestrate_ah_resource" {
   rest_api_id = aws_api_gateway_rest_api.ah_apigw.id
   parent_id   = aws_api_gateway_rest_api.ah_apigw.root_resource_id
-  path_part   = "accountinghub"
+  path_part   = "orchestrate"
 }
 
-resource "aws_api_gateway_method" "accounting_hub_method" {
+resource "aws_api_gateway_method" "orchestrate_ah_method" {
   rest_api_id   = aws_api_gateway_rest_api.ah_apigw.id
-  resource_id   = aws_api_gateway_resource.accounting_hub_resource.id
+  resource_id   = aws_api_gateway_resource.orchestrate_ah_resource.id
+  http_method   = "POST"
+  authorization = "NONE"
+}
+
+resource "aws_api_gateway_integration" "orchestrate_ah_integration" {
+  rest_api_id             = aws_api_gateway_rest_api.ah_apigw.id
+  resource_id             = aws_api_gateway_resource.orchestrate_ah_resource.id
+  http_method             = aws_api_gateway_method.orchestrate_ah_method.http_method
+  integration_http_method = "POST"
+  type                    = "HTTP_PROXY"
+  uri                     = "http://${aws_lb.load_balancer.dns_name}/api/Execute/orchestrate"
+
+  connection_type = "VPC_LINK"
+  connection_id   = aws_api_gateway_vpc_link.vpc_link.id
+}
+
+resource "aws_api_gateway_resource" "status_orchestrate_ah_resource" {
+  rest_api_id = aws_api_gateway_rest_api.ah_apigw.id
+  parent_id   = aws_api_gateway_rest_api.ah_apigw.root_resource_id
+  path_part   = "statusorchestrate"
+}
+
+resource "aws_api_gateway_method" "status_orchestrate_ah_method" {
+  rest_api_id   = aws_api_gateway_rest_api.ah_apigw.id
+  resource_id   = aws_api_gateway_resource.orchestrate_ah_resource.id
   http_method   = "GET"
   authorization = "NONE"
 }
 
-resource "aws_api_gateway_integration" "accounting_hub_integration" {
+resource "aws_api_gateway_integration" "status_orchestrate_ah_integration" {
   rest_api_id             = aws_api_gateway_rest_api.ah_apigw.id
-  resource_id             = aws_api_gateway_resource.accounting_hub_resource.id
-  http_method             = aws_api_gateway_method.accounting_hub_method.http_method
+  resource_id             = aws_api_gateway_resource.status_orchestrate_ah_resource.id
+  http_method             = aws_api_gateway_method.status_orchestrate_ah_method.http_method
   integration_http_method = "GET"
   type                    = "HTTP_PROXY"
-  uri                     = "http://${aws_lb.load_balancer.dns_name}/api/Execute/version"
+  uri                     = "http://${aws_lb.load_balancer.dns_name}/api/Execute/statusorchestrate"
 
   connection_type = "VPC_LINK"
   connection_id   = aws_api_gateway_vpc_link.vpc_link.id

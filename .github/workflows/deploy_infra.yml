@@ -30,7 +30,7 @@ jobs:
           cd UalaAccounting.infra
           cd terraform
           terraform init 
-          terraform plan -var='mambu_apikey=${{ secrets.MAMBU_APIKEY }}' -var='image_url=${{ env.IMAGE_URI }}'
+          terraform plan -var="mambu_apikey=${{ secrets.MAMBU_APIKEY }}" -var="image_url=${{ vars.IMAGE_URI }}"
 
   deploy:
     name: Terraform Deploy
@@ -55,4 +55,4 @@ jobs:
           cd UalaAccounting.infra
           cd terraform
           terraform init
-          terraform apply -var='mambu_apikey=${{ secrets.MAMBU_APIKEY }}' -var='image_url=${{ env.IMAGE_URI }}' --auto-approve=true
+          terraform apply -var="mambu_apikey=${{ secrets.MAMBU_APIKEY }}" -var="image_url=${{ vars.IMAGE_URI }}" --auto-approve

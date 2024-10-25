@@ -40,4 +40,4 @@ jobs:
           cd UalaAccounting.infra
           cd terraform
           terraform init
-          terraform destroy --auto-approve=true        
+          terraform destroy --auto-approve=true
