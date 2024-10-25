@@ -65,12 +65,7 @@ namespace UalaAccounting.api.ApplicationCore
             });
 
             DateTime startDate = DateTime.Today.AddDays(-1); // Hoy a las 00:00:00
-            DateTime endDate = DateTime.Today.AddSeconds(-1); 
-
-            await retryPolicy.ExecuteAsync(async () => 
-            {
-                await businessLogic.Process(startDate, endDate);
-            });            
+            DateTime endDate = DateTime.Today.AddSeconds(-1);          
 
             await retryPolicy.ExecuteAsync(async () => 
             {
