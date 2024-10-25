@@ -85,7 +85,7 @@ namespace UalaAccounting.api.ApplicationCore
             catch(Exception ex) 
             {
                 if(notificationUrl != null)
-                    await notificationServices.NotificationHttpPOST("ERROT", "NOTOK");
+                    await notificationServices.NotificationHttpPOST("ERROR", "NOTOK");
                 
                 throw ex;
             }
