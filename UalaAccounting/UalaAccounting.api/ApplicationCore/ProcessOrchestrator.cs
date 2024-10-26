@@ -80,7 +80,7 @@ namespace UalaAccounting.api.ApplicationCore
             logger.LogInformation("Orchestration process completed successfully.");
 
             if(notificationUrl != null)
-                await notificationServices.NotificationHttpPOST("SUCCESS", "OK");
+                await notificationServices.NotificationHttpPOST("Success", "OK");
             }
             catch(Exception ex) 
             {
