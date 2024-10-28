@@ -500,7 +500,7 @@ resource "aws_iam_role_policy" "ah_cloudwatch" {
           "logs:GetLogEvents",
           "logs:FilterLogEvents"
         ]
-        Resource = "${aws_cloudwatch_log_group.ah_apigw_logs.arn}:*"
+        Resource = "*"
       }
     ]
   })
