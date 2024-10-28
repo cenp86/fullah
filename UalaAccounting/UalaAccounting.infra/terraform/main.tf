@@ -459,7 +459,7 @@ resource "aws_api_gateway_stage" "api_gateway_stage" {
 
 # Create CloudWatch log group
 resource "aws_cloudwatch_log_group" "ah_apigw_logs" {
-  name              = "/aws/apigateway/${aws_api_gateway_rest_api.ah_apigw.name}"
+  name              = "/aws/apigateway/${aws_api_gateway_rest_api.ah_apigw.id}/${var.environment}"
   retention_in_days = 30
 }
 
