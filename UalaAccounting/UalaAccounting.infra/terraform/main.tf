@@ -420,6 +420,7 @@ resource "aws_api_gateway_rest_api" "ah_apigw" {
     Stage       = "dev"
   }
 }
+
 resource "aws_api_gateway_deployment" "api_gateway_deploy" {
   rest_api_id = aws_api_gateway_rest_api.ah_apigw.id
   #stage_name  = var.environment
@@ -443,24 +444,25 @@ resource "aws_api_gateway_deployment" "api_gateway_deploy" {
 
 resource "aws_api_gateway_stage" "api_gateway_stage" {
   deployment_id = aws_api_gateway_deployment.api_gateway_deploy.id
-  rest_api_id  = aws_api_gateway_rest_api.ah_apigw.id
-  stage_name   = var.environment
+  rest_api_id   = aws_api_gateway_rest_api.ah_apigw.id
+  stage_name    = var.environment
+}
 
-  # Enable execution logs
-  variables = {
-    "loggingLevel"   = "ERROR,INFO"
-    "metricsEnabled" = "true"
-    "dataTraceEnabled" = "false"
+resource "aws_api_gateway_method_settings" "api_gateway_method_settings" {
+  rest_api_id = aws_api_gateway_rest_api.ah_apigw.id
+  stage_name  = aws_api_gateway_stage.api_gateway_stage.stage_name
+  method_path = "*/*"
+  settings {
+    logging_level      = "ERROR,INFO"
+    data_trace_enabled = false
+    metrics_enabled    = true
   }
-
-  # Enable detailed CloudWatch metrics
-  xray_tracing_enabled = false
 }
 
 # Create CloudWatch log group
 resource "aws_cloudwatch_log_group" "ah_apigw_logs" {
   name              = "/aws/apigateway/${aws_api_gateway_rest_api.ah_apigw.id}/${var.environment}"
-  retention_in_days = 30
+  retention_in_days = 0
 }
 
 # Required IAM role for API Gateway logging
