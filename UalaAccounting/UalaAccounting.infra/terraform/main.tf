@@ -422,7 +422,7 @@ resource "aws_api_gateway_rest_api" "ah_apigw" {
 }
 resource "aws_api_gateway_deployment" "api_gateway_deploy" {
   rest_api_id = aws_api_gateway_rest_api.ah_apigw.id
-  stage_name  = var.environment
+  #stage_name  = var.environment
 
   variables = {
     "vpc_link_id" = aws_api_gateway_vpc_link.vpc_link.id
@@ -439,6 +439,76 @@ resource "aws_api_gateway_deployment" "api_gateway_deploy" {
   lifecycle {
     create_before_destroy = true
   }
+}
+
+resource "aws_api_gateway_stage" "api_gateway_stage" {
+  deployment_id = aws_api_gateway_deployment.api_gateway_deploy.id
+  rest_api_id  = aws_api_gateway_rest_api.ah_apigw.id
+  stage_name   = var.environment
+
+  # Enable execution logs
+  variables = {
+    "loggingLevel"   = "ERROR,INFO"
+    "metricsEnabled" = "true"
+    "dataTraceEnabled" = "false"
+  }
+
+  # Enable detailed CloudWatch metrics
+  xray_tracing_enabled = false
+}
+
+# Create CloudWatch log group
+resource "aws_cloudwatch_log_group" "ah_apigw_logs" {
+  name              = "/aws/apigateway/${aws_api_gateway_rest_api.ah_apigw.name}"
+  retention_in_days = 30
+}
+
+# Required IAM role for API Gateway logging
+resource "aws_iam_role" "ah_cloudwatch" {
+  name = "api_gateway_cloudwatch_role_ah_${var.environment}"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "apigateway.amazonaws.com"
+        }
+      }
+    ]
+  })
+}
+
+# Attach necessary permissions to the IAM role
+resource "aws_iam_role_policy" "ah_cloudwatch" {
+  name = "api_gateway_cloudwatch_policy"
+  role = aws_iam_role.ah_cloudwatch.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "logs:CreateLogGroup",
+          "logs:CreateLogStream",
+          "logs:DescribeLogGroups",
+          "logs:DescribeLogStreams",
+          "logs:PutLogEvents",
+          "logs:GetLogEvents",
+          "logs:FilterLogEvents"
+        ]
+        Resource = "${aws_cloudwatch_log_group.ah_apigw_logs.arn}:*"
+      }
+    ]
+  })
+}
+
+# Configure account-level settings
+resource "aws_api_gateway_account" "main" {
+  cloudwatch_role_arn = aws_iam_role.ah_cloudwatch.arn
 }
 
 resource "aws_api_gateway_vpc_link" "vpc_link" {
