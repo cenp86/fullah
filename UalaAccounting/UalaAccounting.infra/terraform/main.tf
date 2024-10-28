@@ -18,7 +18,7 @@
 terraform {
   backend "s3" {
     bucket = "carlosn-bucket"
-    key    = "accounting-hub-tf-backend-${var.environment}"
+    key    = "accounting-hub-tf-backend-dev"
     region = "us-east-1"
   }
 }
