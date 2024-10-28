@@ -389,7 +389,7 @@ namespace UalaAccounting.api.Controllers
             return StatusCode(200, response);
         }
 
-        [HttpGet("triggerBackup")]
+        [HttpPost("triggerBackup")]
         public async Task<IActionResult> RunImportAsync()
         {
             try

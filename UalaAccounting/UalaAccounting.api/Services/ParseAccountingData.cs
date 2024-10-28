@@ -23,7 +23,8 @@ namespace UalaAccounting.api.Services
         {
             try
             {
-                string sql = @"INSERT INTO accountinghubentry
+                if(productKeys.Length > 0){
+                    string sql = @"INSERT INTO accountinghubentry
                                 SELECT 
                                     la.ID AS 'LOANID',
                                     lp.ENCODEDKEY AS 'PRODUCTENCODEDKEY',
@@ -76,32 +77,31 @@ namespace UalaAccounting.api.Services
                                     gje.CREATIONDATE >= @from AND gje.CREATIONDATE < @to AND gje.PRODUCTKEY IN (   
                                 ";
 
-                // Add parameters for product keys
-                for (int i = 0; i < productKeys.Length; i++)
-                {
-                    if (i > 0) sql += ", ";
-                    sql += $"@productKey{i}";
+                    // Add parameters for product keys
+                    for (int i = 0; i < productKeys.Length; i++)
+                    {
+                        if (i > 0) sql += ", ";
+                        sql += $"@productKey{i}";
+                    }
+
+                    sql += ");";
+
+                    // Prepare the parameters
+                    var parameters = new List<MySqlParameter>
+                    {
+                        new MySqlParameter("from", SqlDbType.DateTime) { Value = from },
+                        new MySqlParameter("to", SqlDbType.DateTime) { Value = to }
+                    };
+
+                    // Add product key parameters
+                    for (int i = 0; i < productKeys.Length; i++)
+                    {
+                        parameters.Add(new MySqlParameter($"productKey{i}", SqlDbType.VarChar) { Value = productKeys[i] });
+                    }
+
+                    var result = _dbContext.Database.ExecuteSqlRaw(sql, parameters);
+                    _logger.LogInformation("amount of rows:" + result.ToString());   
                 }
-
-                sql += ");";
-
-                // Prepare the parameters
-                var parameters = new List<MySqlParameter>
-                {
-                    new MySqlParameter("from", SqlDbType.DateTime) { Value = from },
-                    new MySqlParameter("to", SqlDbType.DateTime) { Value = to }
-                };
-
-                // Add product key parameters
-                for (int i = 0; i < productKeys.Length; i++)
-                {
-                    parameters.Add(new MySqlParameter($"productKey{i}", SqlDbType.VarChar) { Value = productKeys[i] });
-                }
-
-
-                var result = _dbContext.Database.ExecuteSqlRaw(sql, parameters);
-                _logger.LogInformation("amount of rows:" + result.ToString());
-
             }
             catch (Exception ex)
             {
@@ -114,7 +114,8 @@ namespace UalaAccounting.api.Services
         {
             try
             {
-                string sql = @"INSERT INTO accountinghubentry
+                if(productKeys.Length > 0){
+                    string sql = @"INSERT INTO accountinghubentry
                                 SELECT 
                                     acc.ID AS 'ACCOUNTID',
                                     lp.ENCODEDKEY AS 'PRODUCTENCODEDKEY',
@@ -155,30 +156,31 @@ namespace UalaAccounting.api.Services
                                     aib.CREATIONDATE >= @from AND aib.CREATIONDATE < @to AND PRODUCTENCODEDKEY IN (
                                 ";
 
-                // Add parameters for product keys
-                for (int i = 0; i < productKeys.Length; i++)
-                {
-                    if (i > 0) sql += ", ";
-                    sql += $"@productKey{i}";
-                }
+                    // Add parameters for product keys
+                    for (int i = 0; i < productKeys.Length; i++)
+                    {
+                        if (i > 0) sql += ", ";
+                        sql += $"@productKey{i}";
+                    }
 
-                sql += ");";
+                    sql += ");";
 
-                // Prepare the parameters
-                var parameters = new List<MySqlParameter>
-                {
-                    new MySqlParameter("from", SqlDbType.DateTime) { Value = from },
-                    new MySqlParameter("to", SqlDbType.DateTime) { Value = to }
-                };
+                    // Prepare the parameters
+                    var parameters = new List<MySqlParameter>
+                    {
+                        new MySqlParameter("from", SqlDbType.DateTime) { Value = from },
+                        new MySqlParameter("to", SqlDbType.DateTime) { Value = to }
+                    };
 
-                // Add product key parameters
-                for (int i = 0; i < productKeys.Length; i++)
-                {
-                    parameters.Add(new MySqlParameter($"productKey{i}", SqlDbType.VarChar) { Value = productKeys[i] });
-                }
+                    // Add product key parameters
+                    for (int i = 0; i < productKeys.Length; i++)
+                    {
+                        parameters.Add(new MySqlParameter($"productKey{i}", SqlDbType.VarChar) { Value = productKeys[i] });
+                    }
 
-                var result = _dbContext.Database.ExecuteSqlRaw(sql, parameters);
-                _logger.LogInformation("amount of rows:" + result.ToString());
+                    var result = _dbContext.Database.ExecuteSqlRaw(sql, parameters);
+                    _logger.LogInformation("amount of rows:" + result.ToString());
+                }                
             }
             catch (Exception ex)
             {

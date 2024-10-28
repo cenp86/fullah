@@ -18,9 +18,8 @@
 terraform {
   backend "s3" {
     bucket = "carlosn-bucket"
-    key    = "my-terraform-project"
+    key    = "accounting-hub-tf-backend-${var.environment}"
     region = "us-east-1"
-    # shared_credentials_file = "~/.aws/credentials"
   }
 }
 
@@ -433,7 +432,8 @@ resource "aws_api_gateway_deployment" "api_gateway_deploy" {
     aws_api_gateway_vpc_link.vpc_link,
     aws_api_gateway_integration.stage_change_lambda_integration,
     aws_api_gateway_integration.orchestrate_ah_integration,
-    aws_api_gateway_integration.status_orchestrate_ah_integration
+    aws_api_gateway_integration.status_orchestrate_ah_integration,
+    aws_api_gateway_integration.trigger_backup_ah_integration
   ]
 
   lifecycle {
@@ -521,6 +521,31 @@ resource "aws_api_gateway_integration" "status_orchestrate_ah_integration" {
   integration_http_method = "POST"
   type                    = "HTTP_PROXY"
   uri                     = "http://${aws_lb.load_balancer.dns_name}/api/Execute/statusorchestrate"
+
+  connection_type = "VPC_LINK"
+  connection_id   = aws_api_gateway_vpc_link.vpc_link.id
+}
+
+resource "aws_api_gateway_resource" "trigger_backup_ah_resource" {
+  rest_api_id = aws_api_gateway_rest_api.ah_apigw.id
+  parent_id   = aws_api_gateway_rest_api.ah_apigw.root_resource_id
+  path_part   = "triggerbackupah"
+}
+
+resource "aws_api_gateway_method" "trigger_backup_ah_method" {
+  rest_api_id   = aws_api_gateway_rest_api.ah_apigw.id
+  resource_id   = aws_api_gateway_resource.trigger_backup_ah_resource.id
+  http_method   = "POST"
+  authorization = "NONE"
+}
+
+resource "aws_api_gateway_integration" "trigger_backup_ah_integration" {
+  rest_api_id             = aws_api_gateway_rest_api.ah_apigw.id
+  resource_id             = aws_api_gateway_resource.trigger_backup_ah_resource.id
+  http_method             = aws_api_gateway_method.trigger_backup_ah_method.http_method
+  integration_http_method = "POST"
+  type                    = "HTTP_PROXY"
+  uri                     = "http://${aws_lb.load_balancer.dns_name}/api/Execute/triggerBackup"
 
   connection_type = "VPC_LINK"
   connection_id   = aws_api_gateway_vpc_link.vpc_link.id
