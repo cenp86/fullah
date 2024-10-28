@@ -453,7 +453,7 @@ resource "aws_api_gateway_method_settings" "api_gateway_method_settings" {
   stage_name  = aws_api_gateway_stage.api_gateway_stage.stage_name
   method_path = "*/*"
   settings {
-    logging_level      = "ERROR,INFO"
+    logging_level      = "INFO"
     data_trace_enabled = false
     metrics_enabled    = true
   }
