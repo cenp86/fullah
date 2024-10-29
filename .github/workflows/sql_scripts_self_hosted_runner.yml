@@ -29,7 +29,7 @@ jobs:
         with:
           mode: start
           github-token: ${{ secrets.GH_MACHINE_PAT}}
-          ec2-image-id: ami-0eb25709391fb4f1d # <------------- insert ami id here
+          ec2-image-id: ami-0e43aa9b251e2b155 # <------------- insert ami id here
           ec2-instance-type: t2.nano # <-------------- optionally change type of instance
           subnet-id: subnet-0f6b374232907413f # <----- insert your subnet id here
           security-group-id: sg-0dc95648b8afa7ee9 # <- insert your security group id here
