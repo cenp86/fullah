@@ -19,4 +19,3 @@ UNLOCK TABLES;
 LOCK TABLES `productaccountinghub` WRITE;
 INSERT INTO `productaccountinghub` VALUES ('8a5ca0548f62549b018f627490880492','PMA-11_AH','A1',1);
 UNLOCK TABLES;
-

@@ -33,6 +33,10 @@ output "aws_lb_dns_name" {
 output "aws_rds_endpoint" {
   value = aws_db_instance.rds_instance.endpoint
 }
+output "api_gateway_triggerbackup_url" {
+  value       = "https://${aws_api_gateway_rest_api.ah_apigw.id}.execute-api.${var.region}.amazonaws.com/${var.environment}/triggerbackupah"
+  description = "The base URL of the API Gateway for the accounting hub triggerbackupah resource"
+}
 output "api_gateway_orchestrate_url" {
   value       = "https://${aws_api_gateway_rest_api.ah_apigw.id}.execute-api.${var.region}.amazonaws.com/${var.environment}/orchestrate"
   description = "The base URL of the API Gateway for the accounting hub orchestrate resource"
