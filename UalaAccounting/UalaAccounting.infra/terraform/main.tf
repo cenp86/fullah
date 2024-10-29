@@ -459,12 +459,6 @@ resource "aws_api_gateway_method_settings" "api_gateway_method_settings" {
   }
 }
 
-# Create CloudWatch log group
-resource "aws_cloudwatch_log_group" "ah_apigw_logs" {
-  name              = "/aws/apigateway/${aws_api_gateway_rest_api.ah_apigw.id}/${var.environment}"
-  retention_in_days = 0
-}
-
 # Required IAM role for API Gateway logging
 resource "aws_iam_role" "ah_cloudwatch" {
   name = "api_gateway_cloudwatch_role_ah_${var.environment}"
