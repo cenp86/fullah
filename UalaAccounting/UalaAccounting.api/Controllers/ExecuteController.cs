@@ -478,5 +478,33 @@ namespace UalaAccounting.api.Controllers
 
             return StatusCode(200, response);
         }
+
+        [HttpPost]
+        public async Task<IActionResult> PostAsync()
+        {
+            try
+            {
+                // Kick off the long-running process asynchronously
+                await ProcessRequestAsync();
+
+                // Return a 202 Accepted response immediately
+                return Accepted();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error processing request");
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing the request.");
+            }
+        }
+
+        private async Task ProcessRequestAsync()
+        {
+            _logger.LogInformation($"STARTING the Execution of API PostAsync....");
+            // Simulate a long-running process
+            await Task.Delay(120000); // 2 minute
+            _logger.LogInformation($"ENDING the Execution of API PostAsync....");
+            // Process the request and save the results
+            // ...
+        }      
     }
 }
