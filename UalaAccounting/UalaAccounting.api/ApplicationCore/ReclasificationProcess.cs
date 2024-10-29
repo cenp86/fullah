@@ -33,7 +33,7 @@ namespace UalaAccounting.api.ApplicationCore
                 logger.LogInformation($"Load Accounting Entries({accountingEntriesList.Count})");
                 await journalEntriesReclassification(accountingEntriesList);
 
-                //RECLASIFICACION DE AJUSTES
+                //RECLASIFICACION DE AJUSTESS
                 List<Accountinghubentry> adjustmentEntriesList = await accountingEntriesData.GetAdjustmentEntriesAsync(from, to);
                 logger.LogInformation($"Load Adjustments Entries({adjustmentEntriesList.Count})");
                 await adjustmentsReclassification(adjustmentEntriesList);
