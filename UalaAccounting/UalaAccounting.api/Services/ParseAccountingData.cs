@@ -12,15 +12,19 @@ namespace UalaAccounting.api.Services
     {
         private readonly ContaContext _dbContext;
         private readonly ILogger<ParseAccountingData> _logger;
+        private readonly IDbContextFactory<ContaContext> _contextFactory;
 
-        public ParseAccountingData(ContaContext dbContext, ILogger<ParseAccountingData> logger)
+        public ParseAccountingData(ContaContext dbContext, ILogger<ParseAccountingData> logger, IDbContextFactory<ContaContext> contextFactory)
         {
             _dbContext = dbContext;
             _logger = logger;
+            _contextFactory = contextFactory;
         }
 
         public async Task GetParseAccountingGljournalentryDataAsync(DateTime from, DateTime to, string[] productKeys)
         {
+            using var _dbContext = _contextFactory.CreateDbContext();
+
             try
             {
                 if(productKeys.Length > 0){
@@ -112,6 +116,8 @@ namespace UalaAccounting.api.Services
 
         public async Task GetParseAccountingBreackdownDataAsync(DateTime from, DateTime to, string[] productKeys)
         {
+            using var _dbContext = _contextFactory.CreateDbContext();
+            
             try
             {
                 if(productKeys.Length > 0){
@@ -191,6 +197,8 @@ namespace UalaAccounting.api.Services
 
         public async Task DeleteAsync(DateTime from, DateTime to)
         {
+            using var _dbContext = _contextFactory.CreateDbContext();
+            
             try
             {
                 var originalEntriesToDelete = await _dbContext.Accountinghubentries.Where(x => x.Creationdate >= from && x.Creationdate < to).ToListAsync();

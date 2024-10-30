@@ -24,6 +24,8 @@ public partial class ContaContext : DbContext
 
     public virtual DbSet<Accountinghublog> Accountinghublogs { get; set; }
 
+    public virtual DbSet<Accountinghubprocesscontrol> Accountinghubprocesscontrols { get; set; }
+
     public virtual DbSet<Accountinginterestaccrualbreakdown> Accountinginterestaccrualbreakdowns { get; set; }
 
     public virtual DbSet<Branch> Branches { get; set; }
@@ -167,6 +169,9 @@ public partial class ContaContext : DbContext
             entity.Property(e => e.Reversaltransactionid)
                 .HasMaxLength(32)
                 .HasColumnName("REVERSALTRANSACTIONID");
+            entity.Property(e => e.Transactionchannel)
+                .HasMaxLength(45)
+                .HasColumnName("TRANSACTIONCHANNEL");
             entity.Property(e => e.Transactionid)
                 .HasMaxLength(32)
                 .HasDefaultValueSql("''")
@@ -286,6 +291,33 @@ public partial class ContaContext : DbContext
                 .HasColumnName("LOGLINE")
                 .UseCollation("utf8mb3_general_ci")
                 .HasCharSet("utf8mb3");
+        });
+
+        modelBuilder.Entity<Accountinghubprocesscontrol>(entity =>
+        {
+            entity.HasKey(e => e.Processuuid).HasName("PRIMARY");
+
+            entity.ToTable("accountinghubprocesscontrol");
+
+            entity.HasIndex(e => e.Startdate, "STARTDATE_IDX");
+
+            entity.HasIndex(e => e.Status, "STATUS_IDX");
+
+            entity.Property(e => e.Processuuid)
+                .HasMaxLength(45)
+                .HasColumnName("PROCESSUUID");
+            entity.Property(e => e.Currentstep)
+                .HasMaxLength(45)
+                .HasColumnName("CURRENTSTEP");
+            entity.Property(e => e.Enddate)
+                .HasColumnType("datetime")
+                .HasColumnName("ENDDATE");
+            entity.Property(e => e.Startdate)
+                .HasColumnType("datetime")
+                .HasColumnName("STARTDATE");
+            entity.Property(e => e.Status)
+                .HasMaxLength(45)
+                .HasColumnName("STATUS");
         });
 
         modelBuilder.Entity<Accountinginterestaccrualbreakdown>(entity =>
@@ -785,6 +817,20 @@ public partial class ContaContext : DbContext
                 .HasMaxLength(32)
                 .HasColumnName("USERKEY")
                 .UseCollation("utf8mb3_bin");
+
+            entity.HasOne(d => d.AssignedbranchkeyNavigation).WithMany(p => p.Gljournalentries)
+                .HasForeignKey(d => d.Assignedbranchkey)
+                .HasConstraintName("GLJOURNALENTRY_FK2");
+
+            entity.HasOne(d => d.GlaccountEncodedkeyO).WithMany(p => p.Gljournalentries)
+                .HasForeignKey(d => d.GlaccountEncodedkeyOid)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("GLJOURNALENTRY_FK1");
+
+            entity.HasOne(d => d.ReversalentrykeyNavigation).WithMany(p => p.InverseReversalentrykeyNavigation)
+                .HasForeignKey(d => d.Reversalentrykey)
+                .OnDelete(DeleteBehavior.SetNull)
+                .HasConstraintName("GLJOURNALENTRY_IBFK_1");
         });
 
         modelBuilder.Entity<Loanaccount>(entity =>
@@ -2160,9 +2206,6 @@ public partial class ContaContext : DbContext
                 .HasComment("ACCOUNTCHART")
                 .HasColumnName("ACCOUNTCHART");
             entity.Property(e => e.Adjust).HasColumnName("ADJUST");
-            entity.Property(e => e.Amount)
-                .HasMaxLength(45)
-                .HasColumnName("AMOUNT");
             entity.Property(e => e.Creationdate)
                 .HasColumnType("datetime")
                 .HasColumnName("CREATIONDATE");
@@ -2185,6 +2228,7 @@ public partial class ContaContext : DbContext
             entity.Property(e => e.Observaciones)
                 .HasMaxLength(5000)
                 .HasColumnName("OBSERVACIONES");
+            entity.Property(e => e.Orderaccount).HasColumnName("ORDERACCOUNT");
             entity.Property(e => e.Outputglcode)
                 .HasMaxLength(45)
                 .HasColumnName("OUTPUTGLCODE");

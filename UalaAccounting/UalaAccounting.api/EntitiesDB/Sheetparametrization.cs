@@ -42,5 +42,5 @@ public partial class Sheetparametrization
 
     public bool Overdueppal { get; set; }
 
-    public string? Amount { get; set; }
+    public bool Orderaccount { get; set; }
 }

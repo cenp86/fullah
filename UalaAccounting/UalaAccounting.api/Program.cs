@@ -9,7 +9,7 @@ var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
 
 //var awsOptions = configuration.GetAWSOptions();
-//awsOptions.Credentials = new BasicAWSCredentials("ASIART7A34XJHB3FOIMD", "rIDXCtwbSUDWtuWF0ECljR6/YqaKvz4ZlLU5rCsS");
+//awsOptions.Credentials = new BasicAWSCredentials("", "");
 
 
 

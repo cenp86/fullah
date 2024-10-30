@@ -8,15 +8,19 @@ namespace UalaAccounting.api.Services
     {
         private readonly ContaContext _dbContext;
         private readonly ILogger<DbLogger> _logger;
+        private readonly IDbContextFactory<ContaContext> _contextFactory;
 
-        public AccountingEntriesData(ContaContext dbContext, ILogger<DbLogger> logger)
+        public AccountingEntriesData(ContaContext dbContext, ILogger<DbLogger> logger, IDbContextFactory<ContaContext> contextFactory)
         {
             _dbContext = dbContext;
             _logger = logger;
+            _contextFactory = contextFactory;
         }
 
         public async Task<List<Accountinghubentry>> GetAccountingEntriesAsync(DateTime from, DateTime to)
         {
+            using var _dbContext = _contextFactory.CreateDbContext();
+
             try
             {
                 return await _dbContext.Accountinghubentries
@@ -33,6 +37,8 @@ namespace UalaAccounting.api.Services
 
         public async Task<List<Accountinghubentry>> GetAdjustmentEntriesAsync(DateTime from, DateTime to)
         {
+            using var _dbContext = _contextFactory.CreateDbContext();
+
             try
             {
                 return await _dbContext.Accountinghubentries
@@ -49,6 +55,8 @@ namespace UalaAccounting.api.Services
 
         public async Task AccountingEntriesInsertBatchAsync(List<Accountinghubexit> list)
         {
+            using var _dbContext = _contextFactory.CreateDbContext();
+
             try
             {
                 await _dbContext.AddRangeAsync(list);
@@ -64,6 +72,8 @@ namespace UalaAccounting.api.Services
 
         public async Task<List<Accountinghubexit>> getOriginalEntriesFromAdjustedAsync(string originalTransactionId, string glCode)
         {
+            using var _dbContext = _contextFactory.CreateDbContext();
+
             try
             {
                 return await _dbContext.Accountinghubexits.Where(x => x.Transactionid == originalTransactionId && x.Mambuglcode == glCode).ToListAsync();
@@ -77,6 +87,8 @@ namespace UalaAccounting.api.Services
 
         public async Task DeleteNewEntriesAsync(DateTime from, DateTime to)
         {
+            using var _dbContext = _contextFactory.CreateDbContext();
+
             try
             {
                 var newEntriesToDelete = await _dbContext.Accountinghubexits.Where(x => x.Creationdate >= from && x.Creationdate < to).ToListAsync();
@@ -94,6 +106,8 @@ namespace UalaAccounting.api.Services
 
         public async Task<Loanaccounthistory> getAccountDetailsAsync(string loanid)
         {
+            using var _dbContext = _contextFactory.CreateDbContext();
+            
             try
             {
                 var data = await _dbContext.Loanaccounthistories.Where(x => x.Id == loanid).ToListAsync();

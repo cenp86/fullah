@@ -44,4 +44,6 @@ public partial class Accountinghubentry
     public bool IsPrepayment { get; set; }
 
     public bool IsOverdue { get; set; }
+
+    public string? Transactionchannel { get; set; }
 }

@@ -11,7 +11,7 @@ namespace UalaAccounting.api.Extensions
     public static class GroupExtensionServices
     {
         public static IServiceCollection AddServicesMambu(this IServiceCollection services, IConfiguration configuration)
-        {
+        {            
             services.AddScoped<IParseAccountingData, ParseAccountingData>();
             services.AddScoped<IBusinessLogic, BusinessLogic>();
             services.AddScoped<IConfigurationApp, ConfigurationApp>();
@@ -44,7 +44,7 @@ namespace UalaAccounting.api.Extensions
             services.AddScoped<IShellServices, ShellServices>();
             services.AddScoped<INotificationServices, NotificationServices>();
 
-            services.AddDbContextPool<ContaContext>((serviceProvider, options) =>
+            services.AddDbContextFactory<ContaContext>((serviceProvider, options) =>
             {
                 var connectionString = configuration["ACHUB"];
                 options.UseMySql(connectionString,

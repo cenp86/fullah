@@ -112,9 +112,7 @@ namespace UalaAccounting.api.ApplicationCore
                         //CONDICION PARA GENERAR SEGUNDO ASIENTO POR CAPITAL EXIGIBLE EN VENCIMIENTO DE CUOTA
                         else if (rule.Overdueppal && item.Loantransactiontype == "INTEREST_APPLIED" && item.Principaldue > 0 && item.IsOverdue)
                         {
-                            if(rule.Amount == "PRINCIPALDUE"){
-                                newEntry.Amount = item.Principaldue;
-                            }
+                            newEntry.Amount = item.Principaldue;
                         }
 
                         //CONDONACIONES VALIDACION DE CANAL TRANSACCIONAL

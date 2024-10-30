@@ -30,4 +30,6 @@ public partial class Glaccount
     public ulong? Striptrailingzeros { get; set; }
 
     public string? Currencycode { get; set; }
+
+    public virtual ICollection<Gljournalentry> Gljournalentries { get; set; } = new List<Gljournalentry>();
 }

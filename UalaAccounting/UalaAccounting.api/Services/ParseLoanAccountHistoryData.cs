@@ -10,11 +10,15 @@ namespace UalaAccounting.api.Services
     {
         private readonly ContaContext _dbContext;
         private readonly ILogger<ParseAccountingData> _logger;
+        private readonly IServiceScopeFactory _serviceScopeFactory;
+        private readonly IDbContextFactory<ContaContext> _contextFactory;
 
-        public ParseLoanAccountHistoryData(ContaContext dbContext, ILogger<ParseAccountingData> logger)
+        public ParseLoanAccountHistoryData(ContaContext dbContext, ILogger<ParseAccountingData> logger, IServiceScopeFactory serviceScopeFactory, IDbContextFactory<ContaContext> contextFactory)
         {
             _dbContext = dbContext;
             _logger = logger;
+            _serviceScopeFactory = serviceScopeFactory;
+            _contextFactory = contextFactory;
         }
 
         public async Task GetParseLoanAccountHistoryDataAsync(DateOnly today)
@@ -22,6 +26,10 @@ namespace UalaAccounting.api.Services
             try
             {
                 _logger.LogInformation($"Get Loan Account from date {today}");
+                
+                // using var scope = _serviceScopeFactory.CreateAsyncScope();                   
+                // var _dbContext = scope.ServiceProvider.GetRequiredService<ContaContext>(); 
+                using var _dbContext = _contextFactory.CreateDbContext();
 
                 //TODO VALIDAR SI SE NECESITAN PASAR TODAS LAS CUENTAS O SOLO LAS ACTIVAS Y EN ATRASO
                 var loanAccountRecords = _dbContext.Loanaccounts.ToList();
@@ -146,7 +154,9 @@ namespace UalaAccounting.api.Services
             try
             {
                 _logger.LogInformation($"Executing DeleteLoanAccountHistoryRecords....");
-
+                               
+                using var _dbContext = _contextFactory.CreateDbContext();
+                
                 var recordsToDelete = await _dbContext.Loanaccounthistories.Where(x => x.Snapshotdate == today).ToListAsync();
 
                 _dbContext.Loanaccounthistories.RemoveRange(recordsToDelete);

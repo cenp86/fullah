@@ -23,6 +23,8 @@ public partial class Branch
 
     public string? Emailaddress { get; set; }
 
+    public virtual ICollection<Gljournalentry> Gljournalentries { get; set; } = new List<Gljournalentry>();
+
     public virtual ICollection<Loanaccount> Loanaccounts { get; set; } = new List<Loanaccount>();
 
     public virtual ICollection<Loantransaction> Loantransactions { get; set; } = new List<Loantransaction>();

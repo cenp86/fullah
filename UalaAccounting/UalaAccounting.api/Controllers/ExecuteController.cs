@@ -29,7 +29,7 @@ namespace UalaAccounting.api.Controllers
             ILoanAccountHistoryProcess _loanAccountHistoryProcess,
             IProcessOrchestration processOrchestration,
             IMemoryCache cache) 
-		{
+        {
             _processOrchestration = processOrchestration;
             _logger = logger;
             businessLogic = _businessLogic;
@@ -43,6 +43,8 @@ namespace UalaAccounting.api.Controllers
         [HttpPost("orchestrate")]
         public async Task<IActionResult> Orchestrate([FromBody] BackupRequestModel backupRequest)
         {
+            var processId = Guid.NewGuid().ToString();
+
             try{
 
                 if (backupRequest == null)
@@ -60,7 +62,10 @@ namespace UalaAccounting.api.Controllers
                 }
                 else
                 {
-                    await _processOrchestration.Process();
+                    _ = Task.Run(async () =>
+                    {                    
+                        await _processOrchestration.Process(processId);
+                    });                                        
                 }                
             }
             catch(Exception exc)
@@ -81,15 +86,116 @@ namespace UalaAccounting.api.Controllers
             var response = new ApiResponse<string>
             {
                 Type = "https://tools.ietf.org/html/rfc9110#section-15.5.1",
-                Title = "Backup data process successfully.",
+                Title = "Process orchestration initiated successfully.",
                 Status = 200,
-                Data = "OK",
+                Data = $"Process id {processId}",
                 TraceId = HttpContext.TraceIdentifier
             };
 
             return StatusCode(200, response);
         }
 
+        [HttpGet("statusorchestrate")]
+        public async Task<IActionResult> StatusOrchestrate(String processId)
+        {
+            try{
+                if (processId == null)
+                {
+                    var errorResponse = new ApiResponse<string>
+                    {
+                        Type = "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+                        Title = "An error occurred",
+                        Status = 400,
+                        Data = "Invalid data.",
+                        TraceId = HttpContext.TraceIdentifier
+                    };
+
+                    return StatusCode(400, errorResponse);
+                }
+                else
+                {
+                    String result = await _processOrchestration.GetProcessStatus(processId);
+                    
+                    if (result != null)
+                    {
+                        var response = new ApiResponse<string>
+                        {
+                            Type = "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+                            Title = "Status of the process orchestration.",
+                            Status = 200,
+                            Data = result,
+                            TraceId = HttpContext.TraceIdentifier
+                        };
+
+                        return StatusCode(200, response);
+                    }
+                    else
+                    {
+                        var response = new ApiResponse<string>
+                        {
+                            Type = "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+                            Title = "Status of the process orchestration.",
+                            Status = 400,
+                            Data = $"ProcessId {processId} doesn't exist.",
+                            TraceId = HttpContext.TraceIdentifier
+                        };
+
+                        return StatusCode(400, response);                        
+                    }
+                }                
+            }
+            catch(Exception exc)
+            {
+                _logger.LogError($"GetVersion(): {exc}");
+                var errorResponse = new ApiResponse<string>
+                {
+                    Type = "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+                    Title = "An error occurred",
+                    Status = 500,
+                    Data = exc.Message,
+                    TraceId = HttpContext.TraceIdentifier
+                };
+
+                return StatusCode(500, errorResponse);
+            }
+        }
+
+        [HttpGet("LoanAccountHistory")]
+        public async Task<IActionResult> LoanAccountHistory()
+        {
+            try
+            {
+                _logger.LogInformation($"Executing API BuildLoanAccountHistory....");
+
+                await loanAccountHistoryProcess.BuildLoanAccountHistory();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"BuildLoanAccountHistory(): {ex}");
+                
+                var errorResponse = new ApiResponse<string>
+                {
+                    Type = "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+                    Title = "An error occurred",
+                    Status = 500,
+                    Data = ex.Message,
+                    TraceId = HttpContext.TraceIdentifier
+                };
+
+                return StatusCode(500, errorResponse);
+            }
+            var response = new ApiResponse<string>
+            {
+                Type = "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+                Title = "LoanAccountHistory.",
+                Status = 200,
+                Data = "OK",
+                TraceId = HttpContext.TraceIdentifier
+            };
+
+            return StatusCode(200, response);
+
+        }
         
 
         [HttpGet("version")]
@@ -193,43 +299,6 @@ namespace UalaAccounting.api.Controllers
             };
 
             return StatusCode(200, response);
-        }
-
-        [HttpGet("LoanAccountHistory")]
-        public async Task<IActionResult> LoanAccountHistory()
-        {
-            try
-            {
-                _logger.LogInformation($"Executing API BuildLoanAccountHistory....");
-
-                await loanAccountHistoryProcess.BuildLoanAccountHistory();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"BuildLoanAccountHistory(): {ex}");
-                
-                var errorResponse = new ApiResponse<string>
-                {
-                    Type = "https://tools.ietf.org/html/rfc9110#section-15.5.1",
-                    Title = "An error occurred",
-                    Status = 500,
-                    Data = ex.Message,
-                    TraceId = HttpContext.TraceIdentifier
-                };
-
-                return StatusCode(500, errorResponse);
-            }
-            var response = new ApiResponse<string>
-            {
-                Type = "https://tools.ietf.org/html/rfc9110#section-15.5.1",
-                Title = "LoanAccountHistory.",
-                Status = 200,
-                Data = "OK",
-                TraceId = HttpContext.TraceIdentifier
-            };
-
-            return StatusCode(200, response);
-
         }
 
         [HttpGet("GetAccountCharts")]
@@ -478,33 +547,5 @@ namespace UalaAccounting.api.Controllers
 
             return StatusCode(200, response);
         }
-
-        [HttpPost]
-        public async Task<IActionResult> PostAsync()
-        {
-            try
-            {
-                // Kick off the long-running process asynchronously
-                await ProcessRequestAsync();
-
-                // Return a 202 Accepted response immediately
-                return Accepted();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error processing request");
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing the request.");
-            }
-        }
-
-        private async Task ProcessRequestAsync()
-        {
-            _logger.LogInformation($"STARTING the Execution of API PostAsync....");
-            // Simulate a long-running process
-            await Task.Delay(120000); // 2 minute
-            _logger.LogInformation($"ENDING the Execution of API PostAsync....");
-            // Process the request and save the results
-            // ...
-        }      
     }
 }
