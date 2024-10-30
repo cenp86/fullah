@@ -59,12 +59,24 @@ jobs:
           echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
           echo "IMAGE_URI=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_ENV
 
+      # Check if the ECS service is running
+      - name: Check if ECS service is running
+        id: check-service
+        run: |
+          service_status=$(aws ecs describe-services --cluster ${{ vars.ECS_CLUSTER }} --services ${{ vars.ECS_SERVICE }} --query "services[0].status" --output text)
+          if [ "$service_status" != "ACTIVE" ]; then
+            echo "ECS service is not running. Exiting."
+            exit 1
+          fi
+          
       - name: Download task definition
+        if: steps.check-service.outcome == 'success'
         run: |
           aws ecs describe-task-definition --task-definition ${{ vars.ECS_TASK_DEFINITION }} \
           --query taskDefinition > task-definition.json
   
       - name: Fill in the new image ID in the Amazon ECS task definition
+        if: steps.check-service.outcome == 'success'
         id: task-def
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
@@ -73,6 +85,7 @@ jobs:
           image: ${{ steps.build-push.outputs.image }}
   
       - name: Deploy Amazon ECS task definition
+        if: steps.check-service.outcome == 'success'
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
           task-definition: ${{ steps.task-def.outputs.task-definition }}
