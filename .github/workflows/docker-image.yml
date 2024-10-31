@@ -65,8 +65,7 @@ jobs:
         run: |
           service_status=$(aws ecs describe-services --cluster ${{ vars.ECS_CLUSTER }} --services ${{ vars.ECS_SERVICE }} --query "services[0].status" --output text)
           if [ "$service_status" != "ACTIVE" ]; then
-            echo "ECS service is not running. Exiting."
-            exit 1
+            echo "ECS service is not running. Will not redeploy container."
           fi
           
       - name: Download task definition
