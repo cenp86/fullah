@@ -47,7 +47,18 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v2
         with:
           mask-password: 'true'
-
+          
+      # Check if the ECS service is running
+      - name: Check if ECS service is running
+        id: check-service
+        run: |
+          service_status=$(aws ecs describe-services --cluster ${{ vars.ECS_CLUSTER }} --services ${{ vars.ECS_SERVICE }} --query "services[0].status" --output text)
+          if [ "$service_status" != "ACTIVE" ]; then
+            echo "ECS service is not running. Will not redeploy container."
+            echo steps.check-service.outcome
+            exit 1
+          fi
+          
       - name: Build, tag, and push image to Amazon ECR
         id: build-push
         env:
@@ -58,15 +69,6 @@ jobs:
           docker buildx build --platform linux/arm64 --build-arg TENANT=uala -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f UalaAccounting/UalaAccounting.api/Dockerfile --provenance=false --push .
           echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
           echo "IMAGE_URI=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_ENV
-
-      # Check if the ECS service is running
-      - name: Check if ECS service is running
-        id: check-service
-        run: |
-          service_status=$(aws ecs describe-services --cluster ${{ vars.ECS_CLUSTER }} --services ${{ vars.ECS_SERVICE }} --query "services[0].status" --output text)
-          if [ "$service_status" != "ACTIVE" ]; then
-            echo "ECS service is not running. Will not redeploy container."
-          fi
           
       - name: Download task definition
         if: steps.check-service.outcome == 'success'
