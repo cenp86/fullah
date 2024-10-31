@@ -7,5 +7,6 @@ namespace UalaAccounting.api.ApplicationCore
         // Methods
         Task Process(String processid);
         Task<String> GetProcessStatus(string processId);
+        Task<bool> CheckProcessInProgress();
     }
 }

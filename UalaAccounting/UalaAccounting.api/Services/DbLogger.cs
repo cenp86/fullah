@@ -78,6 +78,20 @@ namespace UalaAccounting.api.Services
                 throw ex;                
             }
         }
+
+
+        public async Task<List<Accountinghubprocesscontrol>> GetProcessInProgress(){
+            try
+            {
+                using var _dbContext = _contextFactory.CreateDbContext();
+
+                return await _dbContext.Accountinghubprocesscontrols.Where(x => x.Enddate == null && x.Status == "IN_PROGRESS").ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                throw ex;                
+            }
+        }
     }
 }
-

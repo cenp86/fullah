@@ -40,12 +40,50 @@ namespace UalaAccounting.api.Controllers
             _cache = cache;
         }
 
+        [HttpGet("version")]
+        public async Task<IActionResult> GetVersion()
+        {
+            try
+            {
+                return Ok(Assembly.GetEntryAssembly().GetName().Version);
+            }
+            catch (Exception exc)
+            {
+                _logger.LogError($"GetVersion(): {exc}");
+                var errorResponse = new ApiResponse<string>
+                {
+                    Type = "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+                    Title = "An error occurred",
+                    Status = 500,
+                    Data = exc.Message,
+                    TraceId = HttpContext.TraceIdentifier
+                };
+
+                return StatusCode(500, errorResponse);
+            }
+        }
+        
         [HttpPost("orchestrate")]
         public async Task<IActionResult> Orchestrate([FromBody] BackupRequestModel backupRequest)
         {
             var processId = Guid.NewGuid().ToString();
 
             try{
+                var processItem =  await _processOrchestration.CheckProcessInProgress();
+
+                if(processItem)
+                {
+                    var responseCheck = new ApiResponse<string>
+                    {
+                        Type = "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+                        Title = "Process running",
+                        Status = 200,
+                        Data = $"There is a process running!",
+                        TraceId = HttpContext.TraceIdentifier
+                    };
+
+                    return StatusCode(200, responseCheck);
+                }
 
                 if (backupRequest == null)
                 {
@@ -66,7 +104,20 @@ namespace UalaAccounting.api.Controllers
                     {                    
                         await _processOrchestration.Process(processId);
                     });                                        
-                }                
+                }  
+
+
+            var response = new ApiResponse<string>
+            {
+                Type = "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+                Title = "Process orchestration initiated successfully.",
+                Status = 200,
+                Data = $"Process id {processId}",
+                TraceId = HttpContext.TraceIdentifier
+            };
+
+            return StatusCode(200, response);
+
             }
             catch(Exception exc)
             {
@@ -82,17 +133,6 @@ namespace UalaAccounting.api.Controllers
 
                 return StatusCode(500, errorResponse);
             }
-
-            var response = new ApiResponse<string>
-            {
-                Type = "https://tools.ietf.org/html/rfc9110#section-15.5.1",
-                Title = "Process orchestration initiated successfully.",
-                Status = 200,
-                Data = $"Process id {processId}",
-                TraceId = HttpContext.TraceIdentifier
-            };
-
-            return StatusCode(200, response);
         }
 
         [HttpGet("statusorchestrate")]
@@ -195,31 +235,7 @@ namespace UalaAccounting.api.Controllers
 
             return StatusCode(200, response);
 
-        }
-        
-
-        [HttpGet("version")]
-        public async Task<IActionResult> GetVersion()
-        {
-            try
-            {
-                return Ok(Assembly.GetEntryAssembly().GetName().Version);
-            }
-            catch (Exception exc)
-            {
-                _logger.LogError($"GetVersion(): {exc}");
-                var errorResponse = new ApiResponse<string>
-                {
-                    Type = "https://tools.ietf.org/html/rfc9110#section-15.5.1",
-                    Title = "An error occurred",
-                    Status = 500,
-                    Data = exc.Message,
-                    TraceId = HttpContext.TraceIdentifier
-                };
-
-                return StatusCode(500, errorResponse);
-            }
-        }
+        }        
 
         [HttpGet("UalaAccountingByDate")]
         public async Task<IActionResult> ExecuteApi(DateTime from, DateTime to)

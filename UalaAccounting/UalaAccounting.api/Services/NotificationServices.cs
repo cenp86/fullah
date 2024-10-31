@@ -24,7 +24,7 @@ namespace UalaAccounting.api.Services
             this._apiBase = apiBase;
         }
 
-        public async Task NotificationHttpPOST(string message, string code)
+        public async Task NotificationHttpPOST(string message, string code, string processId)
         {
             string result = string.Empty;
             HttpResponseMessage? response = new HttpResponseMessage();
@@ -36,6 +36,7 @@ namespace UalaAccounting.api.Services
                 NotificationMessage requestBody = new NotificationMessage();
                 requestBody.Message = message;
                 requestBody.Code = code;
+                requestBody.ProcessId = processId;
 
                 var jsonBody = JsonConvert.SerializeObject(requestBody);
 
@@ -70,6 +71,7 @@ namespace UalaAccounting.api.Services
     {
         public string Message { get; set; }         
         public string Code { get; set; }
+        public string ProcessId { get; set; }
     }
         
 }

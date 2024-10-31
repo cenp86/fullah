@@ -35,6 +35,29 @@ namespace UalaAccounting.api.ApplicationCore
             dbLogger = _dbLogger;
         }
 
+        public async Task<bool> CheckProcessInProgress()
+        {
+            logger.LogInformation($"Started check status Orchestrator Process");
+            try
+            {
+                var processInProgress = await dbLogger.GetProcessInProgress();
+
+                if(processInProgress != null && processInProgress.Count > 0)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            catch(Exception ex)
+            {
+                logger.LogError(ex.Message);
+                throw ex;
+            }
+        }
+
         // Methods
         public async Task Process(String processId)
         {
@@ -46,7 +69,7 @@ namespace UalaAccounting.api.ApplicationCore
                 processStartDate = DateTime.Now;
 
                 logger.LogInformation($"Started executing Orchestrator Process");
-                
+
                 await updateProcessStatus(processId, "IN_PROGRESS", "LOADING CONFIGURATION DATA", processStartDate, null, true);
 
                 var configurationList = await configurationData.GetConfigurationEnableAsync();
@@ -67,6 +90,7 @@ namespace UalaAccounting.api.ApplicationCore
 
 
                 await updateProcessStatus(processId, "IN_PROGRESS", "DOWNLOADING DB BACKUP", processStartDate, null, false);
+                //await Task.Delay(TimeSpan.FromMinutes(2));
                 await retryPolicy.ExecuteAsync(async () => 
                 {
                     await backupProcess.GetAndProcessBackUp();
@@ -96,12 +120,12 @@ namespace UalaAccounting.api.ApplicationCore
                 await updateProcessStatus(processId, "COMPLETED", "PROCESS EXECUTED SUCCESFULLY", processStartDate, DateTime.Now, false);
                 
                 if(notificationUrl != null)
-                    await notificationServices.NotificationHttpPOST("Success", "OK");
+                    await notificationServices.NotificationHttpPOST("Success", "OK", processId);
             }
             catch(Exception ex) 
             {
                 if(notificationUrl != null)
-                    await notificationServices.NotificationHttpPOST("ERROR", "NOTOK");
+                    await notificationServices.NotificationHttpPOST("ERROR", "NOTOK", processId);
                 
                 await updateProcessStatus(processId, "FAILED", "PROCESS FAILED", processStartDate, DateTime.Now, false);
                 

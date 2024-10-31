@@ -7,6 +7,7 @@ namespace UalaAccounting.api.Services
         Task LogActionsDbLevel(String logLine);
         Task OrchestrationProcessStatusUpdate(Accountinghubprocesscontrol log, Boolean flagCreateRecord);
         Task<List<Accountinghubprocesscontrol>> GetOrchestrationProcessStatus(String processId);
+        Task<List<Accountinghubprocesscontrol>> GetProcessInProgress();
     }
 }
 
