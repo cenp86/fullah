@@ -48,6 +48,17 @@ jobs:
         with:
           mask-password: 'true'
           
+      - name: Build, tag, and push image to Amazon ECR
+        id: build-push
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: ${{ env.ECR_REPOSITORY }}
+          IMAGE_TAG: latest
+        run: |
+          docker buildx build --platform linux/arm64 --build-arg TENANT=uala -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f UalaAccounting/UalaAccounting.api/Dockerfile --provenance=false --push .
+          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+          echo "IMAGE_URI=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_ENV
+
       # Check if the ECS service is running
       - name: Check if ECS service is running
         id: check-service
@@ -59,17 +70,6 @@ jobs:
             echo "is_service_active=false" >> $GITHUB_OUTPUT
             echo "ECS service is not running. Will not redeploy container."
           fi
-          
-      - name: Build, tag, and push image to Amazon ECR
-        id: build-push
-        env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: ${{ env.ECR_REPOSITORY }}
-          IMAGE_TAG: latest
-        run: |
-          docker buildx build --platform linux/arm64 --build-arg TENANT=uala -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f UalaAccounting/UalaAccounting.api/Dockerfile --provenance=false --push .
-          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
-          echo "IMAGE_URI=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_ENV
           
       - name: Download task definition
         if: steps.check-service.outputs.is_service_active == 'true'
