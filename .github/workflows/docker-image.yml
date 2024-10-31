@@ -53,10 +53,11 @@ jobs:
         id: check-service
         run: |
           service_status=$(aws ecs describe-services --cluster ${{ vars.ECS_CLUSTER }} --services ${{ vars.ECS_SERVICE }} --query "services[0].status" --output text)
-          if [ "$service_status" != "ACTIVE" ]; then
+          if [ "$service_status" = "ACTIVE" ]; then
+            echo "is_service_active=true" >> $GITHUB_OUTPUT
+          else
+            echo "is_service_active=false" >> $GITHUB_OUTPUT
             echo "ECS service is not running. Will not redeploy container."
-            echo ${{ steps.check-service.outcome }}
-            exit 1
           fi
           
       - name: Build, tag, and push image to Amazon ECR
@@ -71,13 +72,13 @@ jobs:
           echo "IMAGE_URI=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_ENV
           
       - name: Download task definition
-        if: steps.check-service.outcome == 'success'
+        if: steps.check-service.outputs.is_service_active == 'true'
         run: |
           aws ecs describe-task-definition --task-definition ${{ vars.ECS_TASK_DEFINITION }} \
           --query taskDefinition > task-definition.json
   
       - name: Fill in the new image ID in the Amazon ECS task definition
-        if: steps.check-service.outcome == 'success'
+        if: steps.check-service.outputs.is_service_active == 'true'
         id: task-def
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
@@ -86,7 +87,7 @@ jobs:
           image: ${{ steps.build-push.outputs.image }}
   
       - name: Deploy Amazon ECS task definition
-        if: steps.check-service.outcome == 'success'
+        if: steps.check-service.outputs.is_service_active == 'true'
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
           task-definition: ${{ steps.task-def.outputs.task-definition }}
