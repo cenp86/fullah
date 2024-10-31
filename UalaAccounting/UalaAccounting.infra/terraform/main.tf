@@ -391,6 +391,7 @@ resource "aws_lambda_function" "state_change_lambda" {
   environment {
     variables = {
       SECRETS_ARN = aws_secretsmanager_secret.credentials.arn
+      MAMBU_URL_BASE = var.mambu_url_base
     }
   }
 }
@@ -576,7 +577,7 @@ resource "aws_api_gateway_resource" "status_orchestrate_ah_resource" {
 resource "aws_api_gateway_method" "status_orchestrate_ah_method" {
   rest_api_id   = aws_api_gateway_rest_api.ah_apigw.id
   resource_id   = aws_api_gateway_resource.status_orchestrate_ah_resource.id
-  http_method   = "POST"
+  http_method   = "GET"
   authorization = "NONE"
 }
 
@@ -584,7 +585,7 @@ resource "aws_api_gateway_integration" "status_orchestrate_ah_integration" {
   rest_api_id             = aws_api_gateway_rest_api.ah_apigw.id
   resource_id             = aws_api_gateway_resource.status_orchestrate_ah_resource.id
   http_method             = aws_api_gateway_method.status_orchestrate_ah_method.http_method
-  integration_http_method = "POST"
+  integration_http_method = "GET"
   type                    = "HTTP_PROXY"
   uri                     = "http://${aws_lb.load_balancer.dns_name}/api/Execute/statusorchestrate"
 
