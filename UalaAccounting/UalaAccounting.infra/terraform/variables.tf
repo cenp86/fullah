@@ -80,7 +80,7 @@ variable "db_username" {
 variable "mambu_url_base" {
   description = "Mambu URL base"
   type        = string
-  default     = "ualamxdev.sandbox.mambu.com"
+  default     = "https://ualamxdev.sandbox.mambu.com"
 }
 variable "mambu_apikey" {
   description = "Mambu apikey"
