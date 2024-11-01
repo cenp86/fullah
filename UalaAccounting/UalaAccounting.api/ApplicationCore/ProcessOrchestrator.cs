@@ -68,7 +68,7 @@ namespace UalaAccounting.api.ApplicationCore
             {
                 processStartDate = DateTime.Now;
 
-                logger.LogInformation($"Started executing Orchestrator Process");
+                logger.LogInformation($"Started executing Orchestrator Process with ID ${processId}");
 
                 await updateProcessStatus(processId, "IN_PROGRESS", "LOADING CONFIGURATION DATA", processStartDate, null, true);
 

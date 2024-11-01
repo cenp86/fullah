@@ -33,9 +33,21 @@ public partial class Accountinghubentry
 
     public string? Loantransactiontype { get; set; }
 
-    public decimal? Principaldue { get; set; }
+    public decimal Principaldue { get; set; }
 
-    public decimal? Pricinpalbalance { get; set; }
+    public decimal Principalbalance { get; set; }
+
+    public decimal Interestdue { get; set; }
+
+    public decimal Interestbalance { get; set; }
+
+    public decimal Feesdue { get; set; }
+
+    public decimal Feesbalance { get; set; }
+
+    public decimal Penaltydue { get; set; }
+
+    public decimal Penaltybalance { get; set; }
 
     public string? Reversaltransactionid { get; set; }
 

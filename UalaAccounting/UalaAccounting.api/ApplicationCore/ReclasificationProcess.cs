@@ -55,6 +55,10 @@ namespace UalaAccounting.api.ApplicationCore
 
                 foreach (var item in accountingEntriesList)
                 {
+
+                    if(item.Loanid == "PHVW8051" && item.Glcode == "1302080221010000" && item.Loantransactiontype == "WRITE_OFF")
+                        Console.WriteLine("ENTRO", item.Loanid);
+
                     var sendOriginalEntry = true;
                     var sendNewEntry = true;
                     var newAmount = item.Amount;
@@ -73,41 +77,81 @@ namespace UalaAccounting.api.ApplicationCore
                         newEntry.Glname = rule.Outputglname;
                         newEntry.Type = rule.Outputjetype != null ? rule.Outputjetype : item.Type;
                         sendOriginalEntry = false;
-
-                        // if(item.Loanid=="SOOR9961" && item.Loantransactiontype=="WRITE_OFF" && item.Principaldue==0)   
-                        // {
-                        //     Console.WriteLine("ENTRE");
-                        // }
                                                     
                         //CONDICION PARA GENERAR SEGUNDO ASIENTO POR CONCEPTO DE IVA -- SE DEBE GENERAR PARAMETRO PARA EL VALOR DEL IVA TODO
                         if (rule.Taxentry)
                         {
                             newEntry.Amount = item.Amount * (decimal)0.16;
+                            sendOriginalEntry = true;
                         }
                         
                         //CONDICION PARA GENERAR SEGUNDO ASIENTO POR CAPITAL EXIGIBLE
                         else if (rule.Principal)
-                        {                     
-                            if(item.Principaldue > 0){
-                                //PARA WRITEOFF
-                                if(item.Loantransactiontype != "REPAYMENT")
-                                    newAmount = (decimal)(item.Pricinpalbalance - item.Principaldue);
-                                else if(item.Loantransactiontype == "REPAYMENT"){
-                                    newAmount = item.Amount;
-                                }                                    
-                                else
-                                    newAmount = (decimal)(item.Amount - item.Principaldue); 
-
-                                //newEntry.Amount = item.Principaldue;
-
-                                if(newAmount > 0)
-                                    sendOriginalEntry = true;                                    
+                        {              
+                            if(item.Loantransactiontype == "REPAYMENT")
+                            {
+                                if(item.Principaldue > 0)
+                                {
+                                    if(item.Amount - item.Principaldue < 0)
+                                    {
+                                        newEntry.Amount = item.Amount;
+                                    }
+                                    else if(item.Amount - item.Principaldue > 0)
+                                    {
+                                        newEntry.Amount = item.Principaldue;
+                                        newAmount = (decimal)(item.Amount - item.Principaldue);
+                                        sendOriginalEntry = true;
+                                    }
+                                }
+                                else                          
+                                {                                    
+                                    sendOriginalEntry = true;
+                                    sendNewEntry = false;
+                                }
                             }
-                            else{
+                            else if(item.Loantransactiontype == "WRITE_OFF")
+                            {
+                                if(item.Principaldue > 0)
+                                {
+                                    newAmount = (decimal)(item.Principalbalance - item.Principaldue);
+                                    newEntry.Amount = item.Principaldue;
+                                    sendOriginalEntry = true;
+                                }
+                                else{
+                                    sendOriginalEntry = true;
+                                    sendNewEntry = false;
+                                }
+                            }
+
+                            // if(item.Principaldue > 0){
+                            //     //PARA WRITEOFF
+                            //     if(item.Loantransactiontype != "REPAYMENT")
+                            //         newAmount = (decimal)(item.Principalbalance - item.Principaldue);
+                            //     else if(item.Loantransactiontype == "REPAYMENT"){
+                            //         newAmount = item.Amount;
+                            //     }                                    
+                            //     else
+                            //         newAmount = (decimal)(item.Amount - item.Principaldue); 
+
+                            //     //newEntry.Amount = item.Principaldue;
+
+                            //     if(newAmount > 0)
+                            //         sendOriginalEntry = true;                                    
+                            // }
+                            // else{
+                            //     sendOriginalEntry = true;
+                            //     sendNewEntry = false;   
+                            // }                                                         
+                        }
+                        else if(rule.Orderaccount)
+                        {
+                            if(item.Loantransactiontype == "WRITE_OFF")
+                            {
+                                newEntry.Amount = item.Principalbalance + item.Interestbalance + item.Penaltybalance + item.Penaltydue;
                                 sendOriginalEntry = true;
-                                sendNewEntry = false;   
-                            }                                                         
-                        }                        
+                                sendNewEntry = true;
+                            }
+                        }                       
 
                         //CONDICION PARA GENERAR SEGUNDO ASIENTO POR CAPITAL EXIGIBLE EN VENCIMIENTO DE CUOTA
                         else if (rule.Overdueppal && item.Loantransactiontype == "INTEREST_APPLIED" && item.Principaldue > 0 && item.IsOverdue)

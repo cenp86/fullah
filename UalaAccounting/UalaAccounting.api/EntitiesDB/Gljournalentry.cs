@@ -34,12 +34,4 @@ public partial class Gljournalentry
     public string? Reversalentrykey { get; set; }
 
     public string? Productkey { get; set; }
-
-    public virtual Branch? AssignedbranchkeyNavigation { get; set; }
-
-    public virtual Glaccount GlaccountEncodedkeyO { get; set; } = null!;
-
-    public virtual ICollection<Gljournalentry> InverseReversalentrykeyNavigation { get; set; } = new List<Gljournalentry>();
-
-    public virtual Gljournalentry? ReversalentrykeyNavigation { get; set; }
 }

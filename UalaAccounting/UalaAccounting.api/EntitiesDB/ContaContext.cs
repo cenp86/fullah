@@ -59,7 +59,6 @@ public partial class ContaContext : DbContext
     public virtual DbSet<Transactionchannel> Transactionchannels { get; set; }
 
     public virtual DbSet<Transactiondetail> Transactiondetails { get; set; }
-
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder
@@ -130,6 +129,12 @@ public partial class ContaContext : DbContext
             entity.Property(e => e.Creationdate)
                 .HasColumnType("datetime")
                 .HasColumnName("CREATIONDATE");
+            entity.Property(e => e.Feesbalance)
+                .HasPrecision(43, 2)
+                .HasColumnName("FEESBALANCE");
+            entity.Property(e => e.Feesdue)
+                .HasPrecision(43, 2)
+                .HasColumnName("FEESDUE");
             entity.Property(e => e.Glcode)
                 .HasMaxLength(32)
                 .HasColumnName("GLCODE")
@@ -141,6 +146,12 @@ public partial class ContaContext : DbContext
                 .HasColumnName("GLNAME")
                 .UseCollation("utf8mb3_bin")
                 .HasCharSet("utf8mb3");
+            entity.Property(e => e.Interestbalance)
+                .HasPrecision(43, 2)
+                .HasColumnName("INTERESTBALANCE");
+            entity.Property(e => e.Interestdue)
+                .HasPrecision(43, 2)
+                .HasColumnName("INTERESTDUE");
             entity.Property(e => e.IsOverdue).HasColumnName("IS_OVERDUE");
             entity.Property(e => e.IsPayoff).HasColumnName("IS_PAYOFF");
             entity.Property(e => e.IsPrepayment).HasColumnName("IS_PREPAYMENT");
@@ -154,9 +165,15 @@ public partial class ContaContext : DbContext
                 .HasColumnName("LOANTRANSACTIONTYPE")
                 .UseCollation("utf8mb3_bin")
                 .HasCharSet("utf8mb3");
-            entity.Property(e => e.Pricinpalbalance)
+            entity.Property(e => e.Penaltybalance)
                 .HasPrecision(43, 2)
-                .HasColumnName("PRICINPALBALANCE");
+                .HasColumnName("PENALTYBALANCE");
+            entity.Property(e => e.Penaltydue)
+                .HasPrecision(43, 2)
+                .HasColumnName("PENALTYDUE");
+            entity.Property(e => e.Principalbalance)
+                .HasPrecision(43, 2)
+                .HasColumnName("PRINCIPALBALANCE");
             entity.Property(e => e.Principaldue)
                 .HasPrecision(43, 2)
                 .HasColumnName("PRINCIPALDUE");
@@ -817,20 +834,6 @@ public partial class ContaContext : DbContext
                 .HasMaxLength(32)
                 .HasColumnName("USERKEY")
                 .UseCollation("utf8mb3_bin");
-
-            entity.HasOne(d => d.AssignedbranchkeyNavigation).WithMany(p => p.Gljournalentries)
-                .HasForeignKey(d => d.Assignedbranchkey)
-                .HasConstraintName("GLJOURNALENTRY_FK2");
-
-            entity.HasOne(d => d.GlaccountEncodedkeyO).WithMany(p => p.Gljournalentries)
-                .HasForeignKey(d => d.GlaccountEncodedkeyOid)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("GLJOURNALENTRY_FK1");
-
-            entity.HasOne(d => d.ReversalentrykeyNavigation).WithMany(p => p.InverseReversalentrykeyNavigation)
-                .HasForeignKey(d => d.Reversalentrykey)
-                .OnDelete(DeleteBehavior.SetNull)
-                .HasConstraintName("GLJOURNALENTRY_IBFK_1");
         });
 
         modelBuilder.Entity<Loanaccount>(entity =>
