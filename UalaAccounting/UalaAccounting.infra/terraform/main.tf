@@ -426,20 +426,23 @@ resource "aws_api_gateway_model" "lambda_stagechange_request_model" {
   content_type = "application/json"
 
   schema = jsonencode({
-    "type" : "object",
-    "properties" : {
-      "accountId" : {
-        "type" : "string"
-      },
-      "dateTime" : {
-        "type" : "string"
-      },
-      "branchAddress" : {
-        "type" : "string"
-      }
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Lambda stagechange",
+  "description": "Validate lambda stage change parameters",
+  "type": "object",
+  "properties": {
+    "accountId": {
+      "type": "string"
     },
-    "required" : ["accountId", "dateTime", "branchAddress"]
-  })
+    "dateTime": {
+      "type": "string"
+    },
+    "branchAddress": {
+      "type": "string"
+    }
+  },
+  "required": [ "accountId", "dateTime","branchAddress" ]
+})
 }
 
 resource "aws_api_gateway_request_validator" "body_validator" {
