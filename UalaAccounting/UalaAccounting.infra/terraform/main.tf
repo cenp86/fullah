@@ -65,7 +65,7 @@ resource "aws_db_instance" "rds_instance" {
   monitoring_role_arn = var.rds_monitor_role_arn
 
   # Enable performance insights
-  performance_insights_enabled = true
+  #performance_insights_enabled = true
 
   tags = {
     Application = var.appname
@@ -320,7 +320,7 @@ resource "aws_ecs_service" "ecs_service" {
 ##########################################################################################
 
 resource "aws_s3_bucket" "s3_bucket" {
-  bucket = "accounting-hub-s3-bucket-${var.environment}"
+  bucket = "accounting-hub-s3-bucket2-${var.environment}"
 
   tags = {
     Application = var.appname
@@ -623,7 +623,9 @@ resource "aws_api_gateway_method" "status_orchestrate_ah_method" {
   resource_id        = aws_api_gateway_resource.status_orchestrate_ah_resource.id
   http_method        = "GET"
   authorization      = "NONE"
-  request_parameters = { "method.request.quesrystring.processId" = true }
+  request_parameters = { 
+    "method.request.quesrystring.processId" = true 
+  }
 }
 
 resource "aws_api_gateway_integration" "status_orchestrate_ah_integration" {
@@ -636,6 +638,10 @@ resource "aws_api_gateway_integration" "status_orchestrate_ah_integration" {
 
   connection_type = "VPC_LINK"
   connection_id   = aws_api_gateway_vpc_link.vpc_link.id
+
+  request_parameters = { 
+    "integration.request.quesrystring.id" = "method.request.quesrystring.processId" 
+  }
 }
 
 resource "aws_api_gateway_method_response" "status_orchestrate_ah_method_response" {
