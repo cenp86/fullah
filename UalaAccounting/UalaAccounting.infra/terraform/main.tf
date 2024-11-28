@@ -624,7 +624,7 @@ resource "aws_api_gateway_method" "status_orchestrate_ah_method" {
   http_method        = "GET"
   authorization      = "NONE"
   request_parameters = {
-    "integration.request.quesrystring.processId" = true
+    "method.request.querystring.processId" = true
   }
 }
 
