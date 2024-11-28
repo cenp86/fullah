@@ -100,5 +100,5 @@ variable "hosted_zone_id" {
 variable "domain_name" {
   description = "Route53 Domain name for public access to LB"
   type        = string
-  default     = "ah.cenponline.net"
+  default     = "cenponline.net"
 }

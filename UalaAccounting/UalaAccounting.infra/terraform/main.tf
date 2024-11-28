@@ -51,7 +51,7 @@ resource "aws_db_instance" "rds_instance" {
   identifier             = "accounting-hub-rds-${var.environment}"
   allocated_storage      = 50
   engine_version         = "8.0.35"
-  instance_class         = "db.t4g.medium"
+  instance_class         = "db.t4g.small"
   db_name                = "conta"
   username               = var.db_username
   password               = random_password.master.result
@@ -156,10 +156,7 @@ resource "aws_lb_target_group" "target_group" {
   target_type = "ip"
   vpc_id      = var.vpc_id
   health_check {
-    # path                = "/health"
     protocol = "TCP"
-    # matcher             = "200"
-    # port                = "traffic-port"
     healthy_threshold   = 2
     unhealthy_threshold = 2
     timeout             = 10
@@ -323,7 +320,7 @@ resource "aws_ecs_service" "ecs_service" {
 ##########################################################################################
 
 resource "aws_s3_bucket" "s3_bucket" {
-  bucket = "accounting-hub-s3-bucket2-${var.environment}"
+  bucket = "accounting-hub-s3-bucket-${var.environment}"
 
   tags = {
     Application = var.appname
@@ -421,6 +418,37 @@ resource "aws_api_gateway_rest_api" "ah_apigw" {
     Stage       = "dev"
   }
 }
+
+resource "aws_api_gateway_model" "lambda_stagechange_request_model" {
+  rest_api_id  = aws_api_gateway_rest_api.ah_apigw.id
+  name         = "LambdaStageChangeRequestModel"
+  description  = "Validate lambda stage change input parameters"
+  content_type = "application/json"
+
+  schema = jsonencode({
+    "type" : "object",
+    "properties" : {
+      "accountId" : {
+        "type" : "string"
+      },
+      "dateTime" : {
+        "type" : "string"
+      },
+      "branchAddress" : {
+        "type" : "string"
+      }
+    },
+    "required" : ["accountId", "dateTime", "branchAddress"]
+  })
+}
+
+resource "aws_api_gateway_request_validator" "lambdastagechangevalidator" {
+  name                        = "LambdaStageChangeValidator"
+  rest_api_id                 = aws_api_gateway_rest_api.ah_apigw.id
+  validate_request_body       = true
+  validate_request_parameters = false
+}
+
 
 resource "aws_api_gateway_deployment" "api_gateway_deploy" {
   rest_api_id = aws_api_gateway_rest_api.ah_apigw.id
@@ -528,10 +556,12 @@ resource "aws_api_gateway_resource" "stage_change_lambda_resource" {
 }
 
 resource "aws_api_gateway_method" "state_change_lambda_method" {
-  rest_api_id   = aws_api_gateway_rest_api.ah_apigw.id
-  resource_id   = aws_api_gateway_resource.stage_change_lambda_resource.id
-  http_method   = "POST"
-  authorization = "NONE"
+  rest_api_id          = aws_api_gateway_rest_api.ah_apigw.id
+  resource_id          = aws_api_gateway_resource.stage_change_lambda_resource.id
+  http_method          = "POST"
+  authorization        = "NONE"
+  request_models       = { "application/json" = aws_api_gateway_model.lambda_stagechange_request_model.name }
+  request_validator_id = aws_api_gateway_request_validator.lambdastagechangevalidator.id
 }
 
 resource "aws_api_gateway_integration" "stage_change_lambda_integration" {
@@ -541,6 +571,13 @@ resource "aws_api_gateway_integration" "stage_change_lambda_integration" {
   integration_http_method = "POST"
   type                    = "AWS_PROXY"
   uri                     = aws_lambda_function.state_change_lambda.invoke_arn
+}
+
+resource "aws_api_gateway_method_response" "stage_change_lambda_method_response" {
+  rest_api_id = aws_api_gateway_rest_api.ah_apigw.id
+  resource_id = aws_api_gateway_resource.stage_change_lambda_resource.id
+  http_method = aws_api_gateway_method.state_change_lambda_method.http_method
+  status_code = 200
 }
 
 resource "aws_api_gateway_resource" "orchestrate_ah_resource" {
@@ -562,10 +599,17 @@ resource "aws_api_gateway_integration" "orchestrate_ah_integration" {
   http_method             = aws_api_gateway_method.orchestrate_ah_method.http_method
   integration_http_method = "POST"
   type                    = "HTTP_PROXY"
-  uri                     = "http://${aws_lb.load_balancer.dns_name}/api/Execute/orchestrate"
+  uri                     = "https://${var.domain_name}/api/Execute/orchestrate"
 
   connection_type = "VPC_LINK"
   connection_id   = aws_api_gateway_vpc_link.vpc_link.id
+}
+
+resource "aws_api_gateway_method_response" "orchestrate_ah_method_response" {
+  rest_api_id = aws_api_gateway_rest_api.ah_apigw.id
+  resource_id = aws_api_gateway_resource.orchestrate_ah_resource.id
+  http_method = aws_api_gateway_method.orchestrate_ah_method.http_method
+  status_code = 200
 }
 
 resource "aws_api_gateway_resource" "status_orchestrate_ah_resource" {
@@ -575,10 +619,11 @@ resource "aws_api_gateway_resource" "status_orchestrate_ah_resource" {
 }
 
 resource "aws_api_gateway_method" "status_orchestrate_ah_method" {
-  rest_api_id   = aws_api_gateway_rest_api.ah_apigw.id
-  resource_id   = aws_api_gateway_resource.status_orchestrate_ah_resource.id
-  http_method   = "GET"
-  authorization = "NONE"
+  rest_api_id        = aws_api_gateway_rest_api.ah_apigw.id
+  resource_id        = aws_api_gateway_resource.status_orchestrate_ah_resource.id
+  http_method        = "GET"
+  authorization      = "NONE"
+  request_parameters = { "method.request.quesrystring.processId" = true }
 }
 
 resource "aws_api_gateway_integration" "status_orchestrate_ah_integration" {
@@ -587,16 +632,23 @@ resource "aws_api_gateway_integration" "status_orchestrate_ah_integration" {
   http_method             = aws_api_gateway_method.status_orchestrate_ah_method.http_method
   integration_http_method = "GET"
   type                    = "HTTP_PROXY"
-  uri                     = "http://${aws_lb.load_balancer.dns_name}/api/Execute/statusorchestrate"
+  uri                     = "https://${var.domain_name}/api/Execute/statusorchestrate"
 
   connection_type = "VPC_LINK"
   connection_id   = aws_api_gateway_vpc_link.vpc_link.id
 }
 
+resource "aws_api_gateway_method_response" "status_orchestrate_ah_method_response" {
+  rest_api_id = aws_api_gateway_rest_api.ah_apigw.id
+  resource_id = aws_api_gateway_resource.status_orchestrate_ah_resource.id
+  http_method = aws_api_gateway_method.status_orchestrate_ah_method.http_method
+  status_code = 200
+}
+
 resource "aws_api_gateway_resource" "trigger_backup_ah_resource" {
   rest_api_id = aws_api_gateway_rest_api.ah_apigw.id
   parent_id   = aws_api_gateway_rest_api.ah_apigw.root_resource_id
-  path_part   = "triggerbackupah"
+  path_part   = "triggerbackup"
 }
 
 resource "aws_api_gateway_method" "trigger_backup_ah_method" {
@@ -612,11 +664,19 @@ resource "aws_api_gateway_integration" "trigger_backup_ah_integration" {
   http_method             = aws_api_gateway_method.trigger_backup_ah_method.http_method
   integration_http_method = "POST"
   type                    = "HTTP_PROXY"
-  uri                     = "http://${aws_lb.load_balancer.dns_name}/api/Execute/triggerBackup"
+  uri                     = "https://${var.domain_name}/api/Execute/triggerBackup"
 
   connection_type = "VPC_LINK"
   connection_id   = aws_api_gateway_vpc_link.vpc_link.id
 }
+
+resource "aws_api_gateway_method_response" "trigger_backup_ah_method_response" {
+  rest_api_id = aws_api_gateway_rest_api.ah_apigw.id
+  resource_id = aws_api_gateway_resource.trigger_backup_ah_resource.id
+  http_method = aws_api_gateway_method.trigger_backup_ah_method.http_method
+  status_code = 200
+}
+
 
 resource "aws_lambda_permission" "allow_api_gateway" {
   statement_id  = "AllowAPIGateway"
