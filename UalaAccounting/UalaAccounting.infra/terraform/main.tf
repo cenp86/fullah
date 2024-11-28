@@ -568,7 +568,7 @@ resource "aws_api_gateway_method" "state_change_lambda_method" {
   http_method          = "POST"
   authorization        = "NONE"
   request_models       = { "application/json" = aws_api_gateway_model.lambda_stagechange_request_model.name }
-  request_validator_id = aws_api_gateway_request_validator.body_validator
+  request_validator_id = aws_api_gateway_request_validator.body_validator.id
 }
 
 resource "aws_api_gateway_integration" "stage_change_lambda_integration" {
@@ -630,7 +630,7 @@ resource "aws_api_gateway_method" "status_orchestrate_ah_method" {
   resource_id        = aws_api_gateway_resource.status_orchestrate_ah_resource.id
   http_method        = "GET"
   authorization      = "NONE"
-  request_validator_id = aws_api_gateway_request_validator.parameters_validator
+  request_validator_id = aws_api_gateway_request_validator.parameters_validator.id
   request_parameters = {
     "method.request.querystring.processId" = true
   }
