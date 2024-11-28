@@ -623,8 +623,8 @@ resource "aws_api_gateway_method" "status_orchestrate_ah_method" {
   resource_id        = aws_api_gateway_resource.status_orchestrate_ah_resource.id
   http_method        = "GET"
   authorization      = "NONE"
-  request_parameters = { 
-    "method.request.quesrystring.processId" = true 
+  request_parameters = {
+    "integration.request.quesrystring.processId" = true
   }
 }
 
@@ -638,10 +638,6 @@ resource "aws_api_gateway_integration" "status_orchestrate_ah_integration" {
 
   connection_type = "VPC_LINK"
   connection_id   = aws_api_gateway_vpc_link.vpc_link.id
-
-  request_parameters = { 
-    "integration.request.quesrystring.id" = "method.request.quesrystring.processId" 
-  }
 }
 
 resource "aws_api_gateway_method_response" "status_orchestrate_ah_method_response" {
