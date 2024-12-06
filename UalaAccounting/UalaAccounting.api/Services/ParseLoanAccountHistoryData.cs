@@ -169,5 +169,19 @@ namespace UalaAccounting.api.Services
                 throw ex;
             }
         }
+
+        public async Task<Loanaccounthistory> GetLoanAccountHistoryRecord(String accountId, DateOnly recordDate)
+        {
+            try{
+                using var _dbContext = _contextFactory.CreateDbContext();
+
+                return await _dbContext.Loanaccounthistories.Where(x => x.Snapshotdate == recordDate && x.Id == accountId).FirstOrDefaultAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                throw ex;
+            }            
+        }
     }
 }

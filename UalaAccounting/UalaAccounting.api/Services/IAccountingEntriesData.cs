@@ -11,6 +11,8 @@ namespace UalaAccounting.api.Services
         Task DeleteNewEntriesAsync(DateTime from, DateTime to);
         Task<List<Accountinghubexit>> getOriginalEntriesFromAdjustedAsync(string originalTransactionKey, string glCode);
         Task<Loanaccounthistory> getAccountDetailsAsync(string loanid);
+        Task DeleteBalancesEntriesAsync(DateTime from, DateTime to);
+        Task BalancesEntriesInsertBatchAsync(List<Accountingbalancestage3> list);
     }
 }
 

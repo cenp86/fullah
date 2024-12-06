@@ -18,6 +18,8 @@ public partial class ContaContext : DbContext
 
     public virtual DbSet<Accountchart> Accountcharts { get; set; }
 
+    public virtual DbSet<Accountingbalancestage3> Accountingbalancestage3s { get; set; }
+
     public virtual DbSet<Accountinghubentry> Accountinghubentries { get; set; }
 
     public virtual DbSet<Accountinghubexit> Accountinghubexits { get; set; }
@@ -59,6 +61,7 @@ public partial class ContaContext : DbContext
     public virtual DbSet<Transactionchannel> Transactionchannels { get; set; }
 
     public virtual DbSet<Transactiondetail> Transactiondetails { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder
@@ -90,6 +93,36 @@ public partial class ContaContext : DbContext
             entity.Property(e => e.Type)
                 .HasMaxLength(45)
                 .HasColumnName("TYPE");
+        });
+
+        modelBuilder.Entity<Accountingbalancestage3>(entity =>
+        {
+            entity.HasKey(e => new { e.Loanid, e.Creationdate })
+                .HasName("PRIMARY")
+                .HasAnnotation("MySql:IndexPrefixLength", new[] { 0, 0 });
+
+            entity.ToTable("accountingbalancestage3");
+
+            entity.Property(e => e.Loanid)
+                .HasMaxLength(32)
+                .HasColumnName("LOANID")
+                .UseCollation("utf8mb3_general_ci")
+                .HasCharSet("utf8mb3");
+            entity.Property(e => e.Creationdate)
+                .HasColumnType("datetime")
+                .HasColumnName("CREATIONDATE");
+            entity.Property(e => e.VarInterestMa)
+                .HasPrecision(50, 10)
+                .HasColumnName("var_INTEREST_MA");
+            entity.Property(e => e.VarInterestS3)
+                .HasPrecision(50, 10)
+                .HasColumnName("var_INTEREST_S3");
+            entity.Property(e => e.VarPenaltyMa)
+                .HasPrecision(50, 10)
+                .HasColumnName("var_PENALTY_MA");
+            entity.Property(e => e.VarPenaltyS3)
+                .HasPrecision(50, 10)
+                .HasColumnName("var_PENALTY_S3");
         });
 
         modelBuilder.Entity<Accountinghubentry>(entity =>
@@ -135,6 +168,9 @@ public partial class ContaContext : DbContext
             entity.Property(e => e.Feesdue)
                 .HasPrecision(43, 2)
                 .HasColumnName("FEESDUE");
+            entity.Property(e => e.Feespaid)
+                .HasPrecision(43, 2)
+                .HasColumnName("FEESPAID");
             entity.Property(e => e.Glcode)
                 .HasMaxLength(32)
                 .HasColumnName("GLCODE")
@@ -152,6 +188,15 @@ public partial class ContaContext : DbContext
             entity.Property(e => e.Interestdue)
                 .HasPrecision(43, 2)
                 .HasColumnName("INTERESTDUE");
+            entity.Property(e => e.Interestma)
+                .HasPrecision(50, 10)
+                .HasColumnName("INTERESTMA");
+            entity.Property(e => e.Interestpaid)
+                .HasPrecision(43, 2)
+                .HasColumnName("INTERESTPAID");
+            entity.Property(e => e.Interests3)
+                .HasPrecision(50, 10)
+                .HasColumnName("INTERESTS3");
             entity.Property(e => e.IsOverdue).HasColumnName("IS_OVERDUE");
             entity.Property(e => e.IsPayoff).HasColumnName("IS_PAYOFF");
             entity.Property(e => e.IsPrepayment).HasColumnName("IS_PREPAYMENT");
@@ -171,12 +216,24 @@ public partial class ContaContext : DbContext
             entity.Property(e => e.Penaltydue)
                 .HasPrecision(43, 2)
                 .HasColumnName("PENALTYDUE");
+            entity.Property(e => e.Penaltyma)
+                .HasPrecision(50, 10)
+                .HasColumnName("PENALTYMA");
+            entity.Property(e => e.Penaltypaid)
+                .HasPrecision(43, 2)
+                .HasColumnName("PENALTYPAID");
+            entity.Property(e => e.Penaltys3)
+                .HasPrecision(50, 10)
+                .HasColumnName("PENALTYS3");
             entity.Property(e => e.Principalbalance)
                 .HasPrecision(43, 2)
                 .HasColumnName("PRINCIPALBALANCE");
             entity.Property(e => e.Principaldue)
                 .HasPrecision(43, 2)
                 .HasColumnName("PRINCIPALDUE");
+            entity.Property(e => e.Principalpaid)
+                .HasPrecision(43, 2)
+                .HasColumnName("PRINCIPALPAID");
             entity.Property(e => e.Productencodedkey)
                 .HasMaxLength(32)
                 .HasDefaultValueSql("''")
@@ -186,6 +243,9 @@ public partial class ContaContext : DbContext
             entity.Property(e => e.Reversaltransactionid)
                 .HasMaxLength(32)
                 .HasColumnName("REVERSALTRANSACTIONID");
+            entity.Property(e => e.Taxrate)
+                .HasPrecision(50, 10)
+                .HasColumnName("TAXRATE");
             entity.Property(e => e.Transactionchannel)
                 .HasMaxLength(45)
                 .HasColumnName("TRANSACTIONCHANNEL");

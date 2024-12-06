@@ -46,17 +46,26 @@ namespace UalaAccounting.api.Services
                                     lt.TYPE AS 'LOANTRANSACTIONTYPE',
                                     IFNULL((lh.PRINCIPALDUE),0) 'PRINCIPALDUE',
                                     IFNULL((lh.PRINCIPALBALANCE),0) 'PRINCIPALBALANCE',
+                                    IFNULL((lh.PRINCIPALPAID),0) 'PRINCIPALPAID',
                                     IFNULL((lh.INTERESTDUE),0) 'INTERESTDUE',
                                     IFNULL((lh.INTERESTBALANCE),0) 'INTERESTBALANCE',
+                                    IFNULL((lh.INTERESTPAID),0) 'INTERESTPAID',
                                     IFNULL((lh.FEESDUE),0) 'FEESDUE',
                                     IFNULL((lh.FEESBALANCE),0) 'FEESBALANCE',
+                                    IFNULL((lh.FEESPAID),0) 'FEESPAID',
                                     IFNULL((lh.PENALTYDUE),0) 'PENALTYDUE',
                                     IFNULL((lh.PENALTYBALANCE),0) 'PENALTYBALANCE',                                                                                                            
+                                    IFNULL((lh.PENALTYPAID),0) 'PENALTYPAID',
                                     rv.TRANSACTIONID 'REVERSALTRANSACTIONID',
                                     CASE WHEN cftx.VALUE = 'True' THEN true ELSE false END 'IS_PAYOFF',
                                     CASE WHEN IFNULL((lh.PRINCIPALDUE),0) > 0 THEN true ELSE false END 'IS_PREPAYMENT',
                                     CASE WHEN ISNULL(lt.USERKEY) THEN true ELSE false END 'IS_OVERDUE',
-                                    tc.NAME as 'TRANSACTIONCHANNEL'
+                                    tc.NAME as 'TRANSACTIONCHANNEL',
+                                    la.TAXRATE AS 'TAXRATE',
+                                    IFNULL((ab.var_INTEREST_S3),0) 'INTERESTS3',
+                                    IFNULL((ab.var_INTEREST_MA),0) 'INTERESTMA',
+                                    IFNULL((ab.var_PENALTY_S3),0) 'PENALTYS3',
+                                    IFNULL((ab.var_PENALTY_MA),0) 'PENALTYMA'                                  
                                 FROM 
                                     conta.gljournalentry gje
                                 LEFT JOIN
@@ -82,7 +91,9 @@ namespace UalaAccounting.api.Services
                                 LEFT JOIN 
                                     transactiondetails td on lt.DETAILS_ENCODEDKEY_OID = td.ENCODEDKEY
                                 LEFT JOIN 
-                                    transactionchannel tc on td.TRANSACTIONCHANNELKEY = tc.ENCODEDKEY                                    
+                                    transactionchannel tc on td.TRANSACTIONCHANNELKEY = tc.ENCODEDKEY          
+                                LEFT JOIN 
+                                    accountingbalancestage3 ab on la.ID = ab.LOANID AND b.NAME='STAGE3' AND DATE(ab.CREATIONDATE) = DATE(DATE_SUB(gje.CREATIONDATE, INTERVAL 1 DAY))                                                           
                                 WHERE 
                                     gje.CREATIONDATE >= @from AND gje.CREATIONDATE < @to AND gje.PRODUCTKEY IN (   
                                 ";
@@ -145,17 +156,26 @@ namespace UalaAccounting.api.Services
                                     'ACCRUED_INTEREST',
                                     0 'PRINCIPALDUE',
                                     0 'PRINCIPALBALANCE',
+                                    0 'PRINCIPALPAID',
                                     0 'INTERESTDUE',
                                     0 'INTERESTBALANCE',
+                                    0 'INTERESTPAID',
                                     0 'FEESDUE',
                                     0 'FEESBALANCE',
+                                    0 'FEESPAID',
                                     0 'PENALTYDUE',
                                     0 'PENALTYBALANCE',                                                                                                            
+                                    0 'PENALTYPAID', 
                                     NULL 'REVERSALTRANSACTIONID',
                                     0 'IS_PAYOFF',
                                     0 'IS_PREPAYMENT',
                                     0 'IS_OVERDUE',
-                                    NULL 'TRANSACTIONCHANNEL'
+                                    NULL 'TRANSACTIONCHANNEL',
+                                    acc.TAXRATE AS 'TAXRATE',
+                                    IFNULL((ab.var_INTEREST_S3),0) 'INTERESTS3',
+                                    IFNULL((ab.var_INTEREST_MA),0) 'INTERESTMA',
+                                    IFNULL((ab.var_PENALTY_S3),0) 'PENALTYS3',
+                                    IFNULL((ab.var_PENALTY_MA),0) 'PENALTYMA'                                          
                                 FROM 
                                     conta.accountinginterestaccrualbreakdown aib
                                 LEFT JOIN 
@@ -170,6 +190,8 @@ namespace UalaAccounting.api.Services
                                     customfieldvalue cfv_actual ON cfv_actual.PARENTKEY = acc.ENCODEDKEY AND cfv_actual.CUSTOMFIELDKEY = (SELECT ENCODEDKEY FROM customfield WHERE ID = '_ACTUAL_STAGE')
                                 LEFT JOIN 
                                     customfieldvalue cfv_last ON cfv_last.PARENTKEY = acc.ENCODEDKEY AND cfv_last.CUSTOMFIELDKEY = (SELECT ENCODEDKEY FROM customfield WHERE ID = '_LAST_STAGE_CHANGE')
+                                LEFT JOIN
+                                    accountingbalancestage3 ab on acc.ID = ab.LOANID AND b.NAME='STAGE3' AND DATE(ab.CREATIONDATE) = DATE(DATE_SUB(aib.CREATIONDATE, INTERVAL 1 DAY))                                    
                                 WHERE 
                                     aib.CREATIONDATE >= @from AND aib.CREATIONDATE < @to AND PRODUCTENCODEDKEY IN (
                                 ";

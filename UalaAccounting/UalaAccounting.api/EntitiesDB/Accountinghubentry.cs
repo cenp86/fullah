@@ -37,17 +37,25 @@ public partial class Accountinghubentry
 
     public decimal Principalbalance { get; set; }
 
+    public decimal Principalpaid { get; set; }
+
     public decimal Interestdue { get; set; }
 
     public decimal Interestbalance { get; set; }
+
+    public decimal Interestpaid { get; set; }
 
     public decimal Feesdue { get; set; }
 
     public decimal Feesbalance { get; set; }
 
+    public decimal Feespaid { get; set; }
+
     public decimal Penaltydue { get; set; }
 
     public decimal Penaltybalance { get; set; }
+
+    public decimal Penaltypaid { get; set; }
 
     public string? Reversaltransactionid { get; set; }
 
@@ -58,4 +66,14 @@ public partial class Accountinghubentry
     public bool IsOverdue { get; set; }
 
     public string? Transactionchannel { get; set; }
+
+    public decimal? Taxrate { get; set; }
+
+    public decimal? Interests3 { get; set; }
+
+    public decimal? Interestma { get; set; }
+
+    public decimal? Penaltys3 { get; set; }
+
+    public decimal? Penaltyma { get; set; }
 }

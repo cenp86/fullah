@@ -120,5 +120,41 @@ namespace UalaAccounting.api.Services
                 throw ex;
             }
         }
+
+        public async Task DeleteBalancesEntriesAsync(DateTime from, DateTime to)
+        {
+            using var _dbContext = _contextFactory.CreateDbContext();
+
+            try
+            {
+                var newEntriesToDelete = await _dbContext.Accountingbalancestage3s.Where(x => x.Creationdate >= from && x.Creationdate < to).ToListAsync();
+
+                _dbContext.Accountingbalancestage3s.RemoveRange(newEntriesToDelete);
+
+                await _dbContext.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                throw ex;
+            }
+        }
+
+        public async Task BalancesEntriesInsertBatchAsync(List<Accountingbalancestage3> list)
+        {
+            using var _dbContext = _contextFactory.CreateDbContext();
+
+            try
+            {
+                await _dbContext.AddRangeAsync(list);
+
+                await _dbContext.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                throw ex;
+            }
+        }        
     }
 }
