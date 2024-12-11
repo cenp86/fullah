@@ -419,6 +419,35 @@ resource "aws_api_gateway_rest_api" "ah_apigw" {
   }
 }
 
+resource "aws_api_gateway_rest_api_policy" "ah_apigw_policy" {
+  rest_api_id = aws_api_gateway_rest_api.ah_apigw.id
+
+  policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Deny",
+      "Principal": "*",
+      "Action": "execute-api:Invoke",
+      "Resource": "${aws_api_gateway_rest_api.ah_apigw_policy.execution_arn}",
+      "Condition": {
+        "NotIpAddress": {
+          "aws:SourceIp": ["163.116.226.119/32","163.116.226.120/32"]
+        }
+      }
+    },
+    {
+      "Effect": "Allow",
+      "Principal": "*",
+      "Action": "execute-api:Invoke",
+      "Resource": "${aws_api_gateway_rest_api.ah_apigw_policy.execution_arn}"
+    }
+  ]
+}
+EOF
+}
+
 resource "aws_api_gateway_model" "lambda_stagechange_request_model" {
   rest_api_id  = aws_api_gateway_rest_api.ah_apigw.id
   name         = "LambdaStageChangeRequestModel"
