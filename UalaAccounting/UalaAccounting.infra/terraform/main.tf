@@ -433,7 +433,7 @@ resource "aws_api_gateway_rest_api_policy" "ah_apigw_policy" {
       "Resource": "${aws_api_gateway_rest_api.ah_apigw.execution_arn}",
       "Condition": {
         "NotIpAddress": {
-          "aws:SourceIp": ["163.116.226.119/32","163.116.226.120/32"]
+          "aws:SourceIp": ["163.116.226.119/32","161.18.119.72/32"]
         }
       }
     },
