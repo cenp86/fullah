@@ -430,7 +430,7 @@ resource "aws_api_gateway_rest_api_policy" "ah_apigw_policy" {
       "Effect": "Deny",
       "Principal": "*",
       "Action": "execute-api:Invoke",
-      "Resource": "${aws_api_gateway_rest_api.ah_apigw.execution_arn}",
+      "Resource": "${aws_api_gateway_rest_api.ah_apigw.execution_arn}/*",
       "Condition": {
         "NotIpAddress": {
           "aws:SourceIp": ["163.116.226.119/32","161.18.119.72/32"]
@@ -441,7 +441,7 @@ resource "aws_api_gateway_rest_api_policy" "ah_apigw_policy" {
       "Effect": "Allow",
       "Principal": "*",
       "Action": "execute-api:Invoke",
-      "Resource": "${aws_api_gateway_rest_api.ah_apigw.execution_arn}"
+      "Resource": "${aws_api_gateway_rest_api.ah_apigw.execution_arn}/*"
     }
   ]
 }
